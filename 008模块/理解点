@@ -1,0 +1,9 @@
+# 使用node 执行的时候,需要先初始化  npm init -y 生成package.json包 ,里面添加下文, 声明脚本是个模块
+
+ <script src="" type="module"></script>
+    "type":"module"
+# 创建 a.js 
+    export {} 暴露
+# 导入当前路径下某js下面暴露出来的模块
+# 创建mokuai.js 
+import  {} from './a.js'
