@@ -1,0 +1,18 @@
+1. 将按钮变成圆 .border-radius 50% 高100px,宽100px;
+2.中等屏幕md,小屏幕xs
+ col-md-8  col-xs-6
+2.如何设置bootstrap row 里面的颜色
+    通过row 和col 的组合来创建
+
+
+    	超小设备手机（<768px）	小型设备平板电脑（≥768px）	中型设备台式电脑（≥992px）	大型设备台式电脑（≥1200px）
+
+3. 设置支持多个列 宽度
+
+    <div class="col-xs-6 col-sm-3" 
+            style="background-color: #dedef8;
+            box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+        </div>
+
+

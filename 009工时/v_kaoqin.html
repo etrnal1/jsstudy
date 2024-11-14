@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./bootstrap.css">
+</head>
+<body>
+    <div id="app" class="container">
+        <!-- 开头模块 -->
+         <div class="row mb-5">
+            <div class="mb-4 md-4"><a href="v_waibao.html
+                ">外包考勤</a></div>
+            <div class="mb-8 md-8"></div>
+         </div>
+         <!-- 公共表头 -->
+          <div class="row mb-5">
+            <div class="col mb-2 md-2">团队公告 *</div>
+            <div class="col mb-8 m">关于试用期加班,请假功能的...</div>
+            <div class="col mb-2">全部</div>
+          </div>
+        <!-- 设计一个手机UI 页面布局 -->
+        <div class="row mb-5">
+            <div class="col mb-3">我的考勤</div>
+            <div class="col mb-3">手机打卡</div>
+            <div class="col mb-3">请假</div>
+            <div class="col mb-3">外出</div>
+        </div>
+        <div class="row mb-5">
+            <div class="col mb-3">补卡</div>
+            <div class="col mb-3"> 发起审批</div>
+            <div class="col mb-3">审批记录</div>
+            <div class="col mb-3"></div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">文件管理</div>
+            <div class="col mb-3"> <a href="./v_git.html">git管理</a></div>
+            <div class="col mb-3"></div>
+            <div class="col mb-3"></div>
+        </div>
+        <div class="row md-5">|考勤</div>
+        <div class="row md-5">
+            <div class="col mb-3">五</div>
+            <div class="col mb-3">六</div>
+            <div class="col mb-3">日</div>
+            <div class="col mb-3">一</div>
+            <div class="col mb-3">二</div>
+            <div class="col mb-3">三</div>
+        </div>
+        <div class="row md-5">
+            <div class="col mb-3">8</div>
+            <div class="col mb-3">休</div>
+            <div class="col mb-3">休</div>
+            <div class="col mb-3">11</div>
+            <div class="col mb-3">12</div>
+            <div class="col mb-3">13</div>
+        </div>
+       <div class="row">
+            <div class ="col md-2"></div>
+            <div class ="col md-8 text-center">
+                <button class="btn btn-success" @click="ka" style="border-radius:50%;width:100px;height:100px;">打卡
+                    <p>{{formattedTime}}</p>
+                </button>
+            </div>         
+       </div>
+       <div class="row">
+        <div class="col col-md-8">
+            
+            <p class="text-success">{{status}}</p>
+            打卡时间: {{katime}}
+        </div>
+       </div>
+
+        <!-- 结束一个手机UI 页面布局 -->
+
+
+
+       
+       
+        </div>
+       
+    </div>
+    <script src="./vue.js"></script>
+    <script src="./vue_ka.js"></script>
+</body>
+</html>
