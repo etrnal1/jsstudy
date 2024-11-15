@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录界面</title>
-    <link rel="stylesheet" href="./bootstrap.css">
+    <!-- <link rel="stylesheet" href="./bootstrap.css"> -->
+    <link rel="stylesheet" href="
+    ./bootstrap.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
 </head>
 <body>
     <div class="container">
@@ -13,13 +16,14 @@
         <div class="row" style="height:100px;"></div>
         <div class="row">
             <div class="col-md-6">
-
             </div>
             <div class="col-md-4">
                 <form action="
                 ">
                     <h2>登录</h2>
+                    <!-- b bottom -->
                     <div class="input-group mb-3">
+                        <!-- span 和input 应该横着排列。而不是树着 -->
                         <span class="input-group-text">
                             <i class="bi bi-person"></i> <!-- 锁图标 -->
                         </span>
@@ -29,14 +33,14 @@
                    
                     <!-- 两者之间要有空格 -->
                      <div class="input-group mb-3">
-                        <span class="input-group-text glyphicon glyphicon-user">
-                            <i class="glyphicon glyphicon-user"></i> <!-- 锁图标 -->
-                        </span>
-                        <input type= "password" class="form-control" placeholder="密码">
+                        <span class="input-group-text ">
+                            <i class="bi bi-eye-fill"></i> 
+                        </span> 
+                       <input type= "password" class="form-control" placeholder="密码">
                        
                      </div>
                      <div>
-                        <span class="glyphicon glyphicon-user"></span>
+                       
                         <input type="checkbox"> 记住用户名
                       
                      </div>
