@@ -85,3 +85,9 @@ async def read_item(item_id: int):
     async def read_user(user_id: str):
         return {"user_id": user_id}
   </code>
+from routers import register, login 是一个用于导入模块的语句。以下是关于这个语句及其模块可能作用的详细介绍：
+
+在 FastAPI 项目中，routers 通常是一个目录，用于组织和管理路由（API 接口）。通过这种结构，开发者可以将功能模块分离到不同的文件中，避免将所有接口逻辑集中在一个文件中，提升代码的可读性和可维护性。
+
+	•	register 和 login 模块可能分别定义了用户注册和用户登录相关的路由和逻辑。
+	•	它们是基于 FastAPI 的 APIRouter 实现的子路由模块，通过 include_router 方法集成到主应用中。

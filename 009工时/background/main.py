@@ -1,9 +1,21 @@
-from fastapi import FastAPI 
+from fastapi import FastAPI
+# 引入login模块
+from routers import login 
 from typing import Union
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel  # 引入 Pydantic 的 BaseModel 模型
-
 app = FastAPI()
+# 解决跨域问题  
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 允许所有来源（生产环境中应限制域名）
+    allow_credentials=True,
+    allow_methods=["*"],  # 允许所有 HTTP 方法
+    allow_headers=["*"],  # 允许所有 HTTP 头
+)
 
+# 注册子路由
+app.include_router(login.router,prefix="/auth",tags=["login"])
 # 请求体和响应体简介：
 # 请求体是从客户端发送到 API 的数据，响应体是 API 返回给客户端的数据。
 

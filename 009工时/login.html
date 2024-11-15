@@ -4,52 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录界面</title>
-    <!-- <link rel="stylesheet" href="./bootstrap.css"> -->
-    <link rel="stylesheet" href="
-    ./bootstrap.css">
+    <link rel="stylesheet" href="./bootstrap.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
 </head>
 <body>
-    <div class="container">
-        <!--问题1. 如何设置空行，
-            问题二col列 里面在排序如何有间隔 -->
-        <div class="row" style="height:100px;"></div>
-        <div class="row">
-            <div class="col-md-6">
-            </div>
-            <div class="col-md-4">
-                <form action="
-                ">
-                    <h2>登录</h2>
-                    <!-- b bottom -->
-                    <div class="input-group mb-3">
-                        <!-- span 和input 应该横着排列。而不是树着 -->
-                        <span class="input-group-text">
-                            <i class="bi bi-person"></i> <!-- 锁图标 -->
-                        </span>
-                        <input  type="text "class="form-control" name="" id="" placeholder="用户名">
+    <div class="container" id="app">
+        <!-- 空行 -->
+        <div class="row" style="height:50px;"></div>
 
+        <!-- 主体内容 -->
+        <div class="row justify-content-center g-4">
+            <!-- 左侧空列 -->
+            <div class="col-md-6"></div>
+
+            <!-- 登录表单 -->
+            <div class="col-md-4">
+                <form action="#">
+                    <h2 class="text-center mb-4">登录</h2>
+
+                    <!-- 用户名 -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">
+                            <i class="bi bi-person"></i> <!-- 用户图标 -->
+                        </span>
+                        <input type="text" class="form-control" v-model ="form.username" placeholder="用户名">
                     </div>
-                   
-                    <!-- 两者之间要有空格 -->
-                     <div class="input-group mb-3">
-                        <span class="input-group-text ">
-                            <i class="bi bi-eye-fill"></i> 
-                        </span> 
-                       <input type= "password" class="form-control" placeholder="密码">
-                       
-                     </div>
-                     <div>
-                       
-                        <input type="checkbox"> 记住用户名
-                      
-                     </div>
-                   
-                    <button class="btn btn-primary">登录</button>
+
+                    <!-- 密码 -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">
+                            <i class="bi bi-eye-fill"></i> <!-- 密码图标 -->
+                        </span>
+                        <input type="password" v-model="form.password" class="form-control" placeholder="密码">
+                    </div>
+
+                    <!-- 记住用户名 -->
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">记住用户名</label>
+                    </div>
+
+                    <!-- 登录按钮 -->
+                    <div class="d-grid" @click="handleLogin">
+                        <button type="submit" class="btn btn-primary">登录</button>
+                    </div>
                 </form>
+                <!-- mt 的含义是 m top -->
+                <div v-if="message" class="mt-3 alert" :class="messageClass">
+                    {{message}}
+                </div>
             </div>
-           
         </div>
     </div>
+    <script src="vue.js"></script>
+
+    <script src="axios.min.js"></script>
+    <script src="login.js"></script>
 </body>
 </html>
