@@ -19,4 +19,4 @@ def login(username:str = Form(...) ,password:str = Form(...) ):
         return {"message": "不存在的用户名"}
     if fake_users_db[username]!=password:
         return {"message": "密码不正确"}
-    return {"message":"login success"}
+    return {"message":"login success","success": True}

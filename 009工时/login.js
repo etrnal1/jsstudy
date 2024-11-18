@@ -27,13 +27,15 @@ new Vue ({
                         },
                     }
                 );
-              
+                console.log(response.data);
                 // 返回成功则成功。不成功则失败
                 if(response.data.success){
                     this.message= "登录成功"
                     this.messageClass= "alert-success"
-                   
-                    window.location = "./dashboard.html";
+                    console.log("跳转代码执行")
+                    window.location.href = "./dashboard.html";
+                  
+                    
                 }else{
                     this.message= response.data.message||'登录失败'
                     this.messageClass="alert-error"
