@@ -187,3 +187,10 @@ axios.post("http://127.0.0.1:8000/auth/login", data, {
 	•	尝试更高级的布局（如 Grid 或自定义组件）。
 
 如需进一步扩展或有其他问题，可以随时告诉我！ 😊
+
+
+## 安装shadrow 
+
+```
+    npx shadcn@latest init
+```    
