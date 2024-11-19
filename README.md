@@ -194,3 +194,16 @@ axios.post("http://127.0.0.1:8000/auth/login", data, {
 ```
     npx shadcn@latest init
 ```    
+
+
+npx shadcn@latest add textarea
+npx shadcn@latest add avatar
+
+# 安装图标库
+
+npx shadcn@latest add dropdown-menu
+
+
+
+
+npx shadcn@latest add dialog
