@@ -1,101 +1,91 @@
-/**
- * 文章详情页面
- * 知识点：
- * 1. Markdown 渲染
- * 2. 样式优化
- * 3. 响应式设计
- * 4. 深色模式支持
- */
+'use client'
 
-import { getPostBySlug } from "@/data/posts";
-import { notFound } from "next/navigation";
-import { Navbar } from "@/components/Navbar";
-import Link from "next/link";
-import { ArrowLeft, Calendar, Tag } from "lucide-react";
-import React from "react";
+import { useEffect, useState } from 'react'
+import { Navbar } from '@/components/Navbar'
+import ReactMarkdown from 'react-markdown'
+import { useParams } from 'next/navigation'
 
-import { marked } from "marked";
-interface BlogPostPageProps {
-  params: {
-    slug: string;
-  };
+interface Post {
+  slug: string
+  title: string
+  date: string
+  content: string
+  tags: string[]
 }
 
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = await getPostBySlug(params.slug);
+export default function PostPage() {
+  const { slug } = useParams()
+  const [post, setPost] = useState<Post | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchPost() {
+      try {
+        const response = await fetch(`/api/posts/${slug}`)
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch post')
+        }
+        const data = await response.json()
+        setPost(data)
+      } catch (error) {
+        console.error('Error fetching post:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (slug) {
+      fetchPost()
+    }
+  }, [slug])
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse text-center">加载中...</div>
+      </div>
+    )
+  }
 
   if (!post) {
-    notFound();
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">文章不存在</div>
+      </div>
+    )
   }
 
   return (
     <>
       <Navbar />
-      {/* 文章头部背景 */}
-      <div className="bg-gradient-to-b from-slate-100 to-white dark:from-slate-900 dark:to-background pt-16 pb-8">
-        <div className="container mx-auto px-4">
-          {/* 返回按钮 */}
-          <Link
-            href="/"
-            className="inline-flex items-center text-muted-foreground hover:text-primary mb-8 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回首页
-          </Link>
-
-          {/* 文章标题区 */}
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight text-slate-900 dark:text-white">
-            {post.title}
-          </h1>
-
-          {/* 文章元信息 */}
-          <div className="flex flex-wrap gap-4 text-muted-foreground">
-            <div className="flex items-center">
-              <Calendar className="w-4 h-4 mr-2" />
-              <time>{post.date}</time>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <article className="prose lg:prose-xl mx-auto">
+          <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
+          <div className="flex items-center gap-4 text-sm text-gray-600 mb-8">
+            <time dateTime={post.date}>
+              {new Date(post.date).toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </time>
+            <div className="flex flex-wrap gap-2">
+              {post.tags.map((tag) => (
+                <span 
+                  key={tag}
+                  className="px-3 py-1 bg-blue-50 text-blue-600 text-sm rounded-full font-medium"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
-            {post.tags && (
-              <div className="flex items-center flex-wrap gap-2">
-                <Tag className="w-4 h-4" />
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
-        </div>
-      </div>
-
-      {/* 文章主体 */}
-      <main className="container mx-auto px-4 py-12">
-        <article className="max-w-3xl mx-auto bg-white dark:bg-slate-900 rounded-lg shadow-lg p-8">
-          {/* 文章描述 */}
-          <div className="mb-12 text-xl text-muted-foreground leading-relaxed border-l-4 border-primary pl-6 py-4 bg-slate-50 dark:bg-slate-800/50 rounded-r">
-            {post.description}
-          </div>
-
-          {/* Markdown 文章内容 */}
-          <div className="prose prose-slate dark:prose-invert prose-lg max-w-none">
-            <div
-              className="markdown-content"
-              dangerouslySetInnerHTML={{ __html: marked(post.content) }}
-            />
-          </div>
-
-          {/* 文章底部 */}
-          <div className="mt-16 pt-8 border-t border-slate-200 dark:border-slate-700">
-            <h2 className="text-2xl font-bold mb-4">分享文章</h2>
-            <div className="flex gap-4">
-              {/* 社交分享按钮 */}
-            </div>
+          <div className="mt-8">
+            <ReactMarkdown>{post.content}</ReactMarkdown>
           </div>
         </article>
-      </main>
+      </div>
     </>
-  );
+  )
 }

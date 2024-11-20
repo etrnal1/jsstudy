@@ -17,7 +17,8 @@ export default function Home() {
           </p>
           <Link href="/posts" className="inline-block">
             <Button size="lg">
-              浏览所有文章
+              <Link href=""></Link>
+             
             </Button>
           </Link>
         </section>

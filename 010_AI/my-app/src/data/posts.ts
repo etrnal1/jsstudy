@@ -82,6 +82,57 @@ export interface Post {
       tags: ["Next.js", "React", "服务器组件"]
     },
     {
+        title:"<></>的用法实践",
+        description:"React Fragment 的用法实践",
+        excerpt:"React Fragment 的用法实践",
+        slug:"react-fragment-practice",
+        date:"2024-03-22",
+        content:`React Fragment 的用法实践
+        <>...</> 是 React Fragment 的简写语法，让我来详细解释：
+基本概念：
+React 要求组件必须返回单个父元素
+Fragment 允许你将多个子元素组合，而无需添加额外的 DOM 节点
+
+        // 完整语法
+<React.Fragment>
+  <Child1 />
+  <Child2 />
+</React.Fragment>
+
+// 简写语法
+<>
+  <Child1 />
+  <Child2 />
+</>
+     使用场景：
+当你需要将多个元素组合在一起，但不想在 HTML 中添加额外的 div
+在表格（<table>）结构中组合多个 <td> 元素
+避免不必要的 DOM 嵌套
+// 不使用 Fragment（会产生额外的 div）
+return (
+  <div>
+    <h1>标题</h1>
+    <p>段落</p>
+  </div>
+);
+
+// 使用 Fragment（不会产生额外的 DOM 节点）
+return (
+  <>
+    <h1>标题</h1>
+    <p>段落</p>
+  </>
+);
+不会渲染到最终的 DOM 中
+不支持添加 className 或其他属性（除非使用完整语法 <React.Fragment>）
+提高性能（减少 DOM 节点）
+保持更清晰的 DOM 结构
+
+        
+        `,
+        tags:["React","Fragment","编程技巧"]
+    },
+    {
       title: "TypeScript 最佳实践",
       description: "提高代码质量的 TypeScript 使用技巧和模式",
       excerpt: "通过实际案例，学习 TypeScript 的高级特性和最佳实践",

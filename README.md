@@ -504,3 +504,54 @@ export default async function DashboardLayout({
    - 实现路由保护和权限控制
 
 通过这种方式，您可以将路由系统想象成一个文件夹树，每个文件夹代表一个路径，每个 `page.tsx` 文件代表该路径的内容。这样可以更直观地理解和组织您的应用程序结构。
+
+ TSX 基本概念
+.tsx 是 TypeScript + JSX 的组合：
+TypeScript (TS): JavaScript 的类型化超集
+JSX: JavaScript 的 XML/HTML 语法扩展
+TSX: 允许在 TypeScript 中使用 JSX 语法
+```
+  function Welcome(props) {
+  return "Hello, " + props.name;
+}
+```
+```
+function Welcome(props: { name: string }) {
+  return "Hello, " + props.name;
+}
+```
+```
+  function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>;
+}
+```
+
+```
+  interface WelcomeProps {
+  name: string;
+}
+
+function Welcome({ name }: WelcomeProps) {
+  return <h1>Hello, {name}</h1>;
+}
+```
+
+// ✅ 正确的类型定义
+interface UserProps {
+  name: string;
+  age: number;
+}
+
+function UserCard({ name, age }: UserProps) {
+  return (
+    <div>
+      <h2>{name}</h2>
+      <p>Age: {age}</p>
+    </div>
+  );
+}
+
+<!-- jsx 与js的区别 -->
+<!-- 类型安全 -->
+
+
