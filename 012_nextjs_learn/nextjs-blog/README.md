@@ -73,6 +73,23 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 
 ## Link 组件使用
+先引入,在使用
+文件命名tsx 
+引用就需要使用,不然会报错
+```
+    import Link from 'next/link';
+    export default function Home(){
+        return (
+            <div>
 
+                Hello world
+                <Link href="/">返回首页</Link>
+            </div)
+    }
 
+```
+
+##  路由 `page` 创建路由作为文件,使用link组件,不需要routing库
+
+## api  /next/link 了解关于Link 组价的更多细腻
 
