@@ -288,3 +288,116 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
     如何自定义 `<head>` for each page 
 
     2. 
+
+  ## rem px 和p-2,p-3的对应关系
+
+```
+    // 1. 使用 PascalCase（大驼峰）
+export default function UserProfileCard() {}
+
+// 2. 使用描述性名称
+export default function ProductSearchResults() {}
+
+// 3. 添加类型或功能后缀
+export default function UserProfilePage() {}     // 页面组件
+export function UserProfileCard() {}            // 卡片组件
+export function UserProfileForm() {}            // 表单组件
+
+// 4. 特定功能组件
+export function LoginButton() {}                // 按钮组件
+export function RegistrationForm() {}           // 表单组件
+```
+### 页面组件命名规范
+  大驼峰原则首字母大写
+```
+  // 1. 文件名规范
+src/
+  app/
+    practice/
+      spacing/
+        page.tsx        // Next.js 页面文件
+        SpacingCard.tsx // 组件文件
+        types.ts        // 类型定义文件
+
+// 2. 组件命名规范
+// ✅ 好的命名方式
+export default function SpacingPracticePage() {}  // 页面组件
+export function SpacingCard() {}                  // 普通组件
+export function UserProfile() {}                  // 描述性命名
+export function NavigationBar() {}               // 清晰的功能命名
+
+// ❌ 不好的命名方式
+export default function spacingPracticePage() {}  // 小写开头
+export default function Spacingpracticepage() {}  // 单词没有分隔
+export default function SP() {}                   // 过于简略
+export default function Page() {}                 // 过于通用
+```
+### 命名规范的原则
+
+```
+// 1. 使用 PascalCase（大驼峰）
+export default function UserProfileCard() {}
+
+// 2. 使用描述性名称
+export default function ProductSearchResults() {}
+
+// 3. 添加类型或功能后缀
+export default function UserProfilePage() {}     // 页面组件
+export function UserProfileCard() {}            // 卡片组件
+export function UserProfileForm() {}            // 表单组件
+
+// 4. 特定功能组件
+export function LoginButton() {}                // 按钮组件
+export function RegistrationForm() {}           // 表单组件
+```
+### 文件组织意义
+```
+// src/app/practice/spacing/page.tsx
+import { SpacingDemo } from './components/SpacingDemo';
+import { SpacingGuide } from './components/SpacingGuide';
+
+export default function SpacingPracticePage() {
+  return (
+    <div>
+      <SpacingDemo />
+      <SpacingGuide />
+    </div>
+  );
+}
+
+// src/app/practice/spacing/components/SpacingDemo.tsx
+export function SpacingDemo() {
+  return (
+    // 具体实现
+  );
+}
+
+// src/app/practice/spacing/components/SpacingGuide.tsx
+export function SpacingGuide() {
+  return (
+    // 具体实现
+  );
+}
+```
+### 类型定义规范
+```
+  // types.ts
+interface SpacingProps {
+  size: number;
+  unit: 'px' | 'rem';
+  direction: 'all' | 'horizontal' | 'vertical';
+}
+
+// 组件使用类型
+export function SpacingDemo({ size, unit, direction }: SpacingProps) {
+  return (
+    // 实现
+  );
+}
+```
+
+## vscode 使用taidwind css
+ 安装相关扩展
+  Tailwind Css 插件
+
+  渐变色
