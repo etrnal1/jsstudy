@@ -1,105 +1,61 @@
-import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            编辑代码从{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>保存并立即查看您的修改.</li>
-        </ol>
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="container mx-auto px-4 py-12">
+        {/* Hero Section */}
+        <section className="mb-16">
+          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400">
+            Taxing Laughter: The Joke Tax Chronicles
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl">
+            The king, seeing how much happier his subjects were, realized the error of
+            his ways and repealed the joke tax.
+          </p>
+        </section>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        {/* Grid Section */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <div className="p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="font-semibold mb-2">Column 1</h3>
+            <p className="text-gray-600">Content for column 1</p>
+          </div>
+          <div className="p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="font-semibold mb-2">Column 2</h3>
+            <p className="text-gray-600">Content for column 2</p>
+          </div>
+          <div className="p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="font-semibold mb-2">Column 3</h3>
+            <p className="text-gray-600">Content for column 3</p>
+          </div>
+        </section>
+
+        {/* Content Section */}
+        <section className="mb-16">
+          <h2 className="scroll-m-20 text-3xl font-semibold tracking-tight mb-6 border-b pb-2">
+            天国的人民
+          </h2>
+          <blockquote className="my-6 border-l-2 pl-6 italic text-gray-700 bg-gray-50 p-4 rounded-r-lg">
+            "After all," he said, "everyone enjoys a good joke, so it's only fair that
+            they should pay for the privilege."
+          </blockquote>
+        </section>
+
+        {/* Action Section */}
+        <section className="flex items-center gap-4">
+          <Link 
+            href="/pages/posts"
+            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            立即部署
-          </a>
-         
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-           阅读我们的文档
-          </a>
-        </div>
-        <div>
-        <Link href="/pages/posts">跳转百度</Link>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            查看文章
+          </Link>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+            Click me
+          </Button>
+        </section>
+      </div>
+    </main>
   );
 }
