@@ -64,7 +64,7 @@ export default function Home() {
                     </Link>
                     <Link href="/practice/colors" 
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      颜色与背景
+                   详情   颜色与背景
                     </Link>
                     <Link href="/practice/typography" 
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
