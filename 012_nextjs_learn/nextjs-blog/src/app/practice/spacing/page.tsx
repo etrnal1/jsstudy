@@ -25,6 +25,64 @@ export default function SpacingPracticePage() {
           间距与尺寸练习
         </h1>
         
+        <div className='space-y-6 p-6 bg-white rounded-lg shadow-md'>
+          {/* Spacing Reference Table */}
+          <table className='w-full text-left border-collapse'>
+            <thead>
+              <tr className='border-b'>
+                <th className='pb-2'>Class</th>
+                <th className='pb-2'>REM</th>
+                <th className='pb-2'>Pixels</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { class: 'p-1', rem: '0.25rem', px: '4px' },
+                { class: 'p-2', rem: '0.5rem', px: '8px' },
+                { class: 'p-3', rem: '0.75rem', px: '12px' },
+                { class: 'p-4', rem: '1rem', px: '16px' },
+                { class: 'p-5', rem: '1.25rem', px: '20px' },
+                { class: 'p-6', rem: '1.5rem', px: '24px' },
+                { class: 'p-8', rem: '2rem', px: '32px' },
+                { class: 'p-10', rem: '2.5rem', px: '40px' },
+                { class: 'p-12', rem: '3rem', px: '48px' },
+                { class: 'p-16', rem: '4rem', px: '64px' },
+              ].map(item => (
+                <tr key={item.class} className='border-b last:border-0'>
+                  <td className='py-2 font-mono'>{item.class}</td>
+                  <td className='py-2 font-mono'>{item.rem}</td>
+                  <td className='py-2 font-mono'>{item.px}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <ul className="list-disc list-inside">
+    <li>特点一</li>
+    <li>特点二</li>
+  </ul>
+          {/* Quick Reference */}
+          <div className='grid grid-cols-2 gap-4 mt-6'>
+            <div className='space-y-2'>
+              <h3 className='font-semibold text-lg'>常用类型前缀</h3>
+              <ul className='space-y-1 list-disc list-inside'>
+                <li>m - 外边距 (margin)</li>
+                <li>p - 内边距 (padding)</li>
+                <li>w - 宽度 (width)</li>
+                <li>h - 高度 (height)</li>
+              </ul>
+            </div>
+            <div className='space-y-2'>
+              <h3 className='font-semibold text-lg'>常用尺寸后缀</h3>
+              <ul className='space-y-1 list-disc list-inside'>
+                <li>full - 100%</li>
+                <li>1/2 - 50%</li>
+                <li>1/4 - 25%</li>
+                <li>1/3 - 33.33%</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+  
         {/* 内边距练习区块 */}
         <section className="mb-12 bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-semibold mb-6 text-blue-600">内边距 (Padding)</h2>

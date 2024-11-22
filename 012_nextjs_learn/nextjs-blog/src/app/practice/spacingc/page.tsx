@@ -1,4 +1,6 @@
 // 容器 首字母大写,大驼峰原则
+import { Button } from "@/components/ui/button";
+import Link from  "next/link";
 export default function SpacingPra() {
   return (
     <>
@@ -117,13 +119,51 @@ export default function SpacingPra() {
                 <div className="w-1/4 h-full bg-green-700" >
                     h-full (全高)
                 </div>
+
+                {/* div 区域 */}
+
+                <div className="w-1/4 h-3/4 border bg-green-800 shadow-sm">
+                    h-3/4 四分之三高
+                    
+                </div>
+
+                 {/* div 区域 */}
+
                 
-                  </div>
+            </div>
+            {/* 1xl 12px  */}
+          
+           
         </div>
 
         </div>
         </section>
 
+
+       
+        <section>
+        <h2 className="text-2xl mb-2 mt-2 font-semibold">间距比例尺</h2>
+        <div className="space-y-4">
+            {[1,2,3,4].map((size)=>(
+                <div key={size} className="flex item-center">
+                    <div className="w-20 text-sm text-gray-600">
+                        p-{size}
+                        
+                    </div>
+                    <div className={`p-${size}
+                    bg-green-600` }>
+                        间距示例
+                    </div>
+                </div>
+
+            ))}
+           测试
+        </div>
+        </section>
+     <Button >
+     <Link href="/">返回首页</Link>
+           
+     </Button>
 
       </div>
     </>
