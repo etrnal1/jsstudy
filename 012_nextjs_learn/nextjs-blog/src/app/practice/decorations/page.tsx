@@ -88,7 +88,7 @@ export default function Decorations() {
     <h2 className="text-2xl font-semibold mb-4">练习背景色</h2>
     {/* 注意拼写,从上到下开始渐变色 */}
     <div>
-        <div className="h-10 bg-gradient-to-t from-blue-500 to-purple-600">李</div>
+        <div className="h-10 bg-gradient-to-t from-blue-500 to-purple-600 grid place-items-center text-white">李莉莉</div>
     </div>
     </div>
   );
