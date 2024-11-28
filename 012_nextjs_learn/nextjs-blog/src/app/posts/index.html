@@ -27,6 +27,10 @@
       }
       function HomePages(){
         const names=['al','gh','Mh']
+        //定义函数逻辑
+        const test=(()=>{
+          console.log("测试")
+        })
         return (
           <>
             <Header title="发展才是硬道理 "/>
@@ -36,7 +40,9 @@
               ))}
               
             </ul>
-            <button >Like</button>
+            <button onClick={test}>Like</button>
+            <button onChange={test}>Change</button>
+            <button onSubmit={test}>Submit</button>
           </>
         )
       }
