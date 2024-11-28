@@ -26,11 +26,18 @@
         return <h1>{ title ?title:'存款赵丽沙'}</h1>
       }
       function HomePages(){
+        const [likes,setLikes] = React.useState(0);
+
+
         const names=['al','gh','Mh']
         //定义函数逻辑
         const test=(()=>{
           console.log("测试")
         })
+        function handleClick(){
+          console.log("Increment like count")
+          setLikes(likes+1)
+        }
         return (
           <>
             <Header title="发展才是硬道理 "/>
@@ -42,7 +49,7 @@
             </ul>
             <button onClick={test}>Like</button>
             <button onChange={test}>Change</button>
-            <button onSubmit={test}>Submit</button>
+            <button onClick={handleClick}>Submit {likes}</button>
           </>
         )
       }
