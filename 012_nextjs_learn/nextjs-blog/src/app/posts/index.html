@@ -8,19 +8,62 @@
     <script type="text/jsx">
     
       const app = document.getElementById('app');
-      function Header() {
-        return <h1>Hello 赵丽莎 </h1>;
-      }
+ 
+      // props 属性时一个对象,可以是{title}进行对象解构,使用{}这些是一种特殊的 JSX 语法，允许您直接在 JSX 标记中编写常规 JavaScript。
+      function Header({title}) {
 
+        console.log(title)
+        return <h1>Hello {title} </h1>;
+      }
+     
+      function Headers(props) {
+
+        
+        return <h1>Hello {props.title} </h1>;
+      }
+     
+      function Cs({title}){
+        return <h1>{ title ?title:'存款赵丽沙'}</h1>
+      }
+      function HomePages(){
+        const names=['al','gh','Mh']
+        return (
+          <>
+            <Header title="发展才是硬道理 "/>
+            <ul>
+              {names.map((name)=>(
+                <li key={name}>{name}</li>
+              ))}
+              
+            </ul>
+
+          </>
+        )
+      }
       function HomePage(){
         return <div>       
-                  <Header />
-                  <Header />
-                  <Header />
+                  <Header title="赵丽沙" />
+                  <Headers title="巩美辰"/>
+                  <Cs />
+                  <HomePages />
                </div>;
       }
       const root = ReactDOM.createRoot(app);
       root.render(<HomePage />);
     </script>
+    <!-- 将信息作为属性传递给 React 组件。这些称为 props。以按钮的可能变体为例：
+     
+      1.父亲组件传递给子组件
+
+        与 JavaScript 函数类似，您可以设计接受自定义参数（或 prop）的组件，这些参数会更改组件的行为或呈现到屏幕上时可见显示的内容。然后，你可以将这些 props 从父组件传递到子组件。
+
+        数据沿着组件树传递,称为单向传递.
+
+        Using props 使用 props
+
+          在 HomePage 组件中，你可以将自定义的 title 属性传递给 Header 组件，就像传递 HTML 属性一样：
+      
+          而 Header，子组件，可以接受这些 props 作为它的第一个函数参数：
+    -->
   </body>
 </html>
