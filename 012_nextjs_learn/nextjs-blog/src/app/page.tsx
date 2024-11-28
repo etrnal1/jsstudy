@@ -25,9 +25,9 @@ export default function Home() {
             </div>
 
             <div className="hidden md:flex items-center space-x-4">
-              <Link href="/posts" className="text-gray-600 hover:text-blue-600">
+              {/* <Link href="/posts" className="text-gray-600 hover:text-blue-600">
                 文章
-              </Link>
+              </Link> */}
               <Link href="/about" className="text-gray-600 hover:text-blue-600">
                 关于
               </Link>
@@ -82,6 +82,11 @@ export default function Home() {
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       装饰与样式
                     </Link>
+                    {/* 添加导航元素练习grid布局 */}
+                    <Link href="/practice/grids" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      练习flex布局
+                    </Link>
+
                   </div>
                 </div>
               </div>
