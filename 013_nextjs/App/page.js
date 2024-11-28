@@ -1,22 +1,16 @@
-"use client"
-
-//  import {useState} from 'react'  // 从react框架中导入useState
-// 复制index.html 去掉body 部分，保存js 
-     
+'use client'
  
-      function Header({ title }) {
+// 将useState 分拆到likebuttons 里面
+import LikeButton from "./likebutton"
+ 
+//  import {useState} from 'react'  // 从react框架中导入useState
+// 复制index.html 去掉body 部分，保存js
+function Header({ title }) {
         return <h1>{title ? title : "Default title"}</h1>
       }
  
-      export default function HomePage() {
+export default function HomePage() {
         const names = ["Ada Lovelace", "Grace Hopper", "Margaret Hamilton"]
- 
-        const [likes, setLikes] = React.useState(0)
- 
-        function handleClick() {
-          setLikes(likes + 1)
-        }
- 
         return (
           <div>
             <Header title="Develop. Preview. Ship." />
@@ -26,7 +20,7 @@
               ))}
             </ul>
  
-            <button onClick={handleClick}>Like ({likes})</button>
+           <LikeButton />
           </div>
         )
       }
