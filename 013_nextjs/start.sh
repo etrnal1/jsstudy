@@ -12,4 +12,10 @@
     }   
 
 ## 创建index.js     
-    
+
+## 创建App 文件夹
+
+    将index.js 移动到App 文件夹内
+
+
+## 将package.json 添加script 模块

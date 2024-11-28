@@ -1,6 +1,6 @@
 {
   "scripts":{
-    "dev":"next dev"
+    "dev":"next dev -p 4000"
   },
   "dependencies": {
     "next": "^15.0.3",
