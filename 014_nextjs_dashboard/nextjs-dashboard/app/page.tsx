@@ -39,8 +39,10 @@ export default function Page() {
         </div>
         <div className="flex items-center justify-center p-6 md:w-3/5 md:px-28 md:py-12">
 
-          <Image src="/hero-desktop.png" width={1000} height={600} alt="仪表盘" className="hidden sm:block"/>
+          <Image src="/hero-desktop.png" width={1000} height={600} alt="仪表盘" className="hidden md:block"/>
           {/* Add Hero Images Here */}
+          {/* 当屏幕搭建尺寸时,才进行显示 md 768px */}
+          <Image src="/hero-mobile.png" width={560} height={620} alt="仪表盘" className="block md:hidden" />
         </div>
       </div>
     </main>
