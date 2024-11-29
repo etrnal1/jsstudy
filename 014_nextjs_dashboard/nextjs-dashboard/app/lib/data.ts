@@ -9,6 +9,7 @@ import {
 } from './definitions';
 import { formatCurrency } from './utils';
 
+// 查询近期数据
 export async function fetchRevenue() {
   try {
     // Artificially delay a response for demo purposes.
@@ -27,7 +28,7 @@ export async function fetchRevenue() {
     throw new Error('Failed to fetch revenue data.');
   }
 }
-
+// 查询最最近5条发票数据
 export async function fetchLatestInvoices() {
   try {
     const data = await sql<LatestInvoiceRaw>`
