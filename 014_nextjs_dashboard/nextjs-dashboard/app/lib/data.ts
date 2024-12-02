@@ -9,13 +9,13 @@ import {
 } from './definitions';
 import { formatCurrency } from './utils';
 
-// 查询近期数据
+// 查询近期数据 【添加注释相关信息】
 export async function fetchRevenue() {
   try {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
 
-    // console.log('Fetching revenue data...');
+    console.log('Fetching revenue data...');
     // await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const data = await sql<Revenue>`SELECT * FROM revenue`;
@@ -28,7 +28,7 @@ export async function fetchRevenue() {
     throw new Error('Failed to fetch revenue data.');
   }
 }
-// 查询最最近5条发票数据
+// 查询最最近5条发票https://obsproject.com/zh-cn数据
 export async function fetchLatestInvoices() {
   try {
     const data = await sql<LatestInvoiceRaw>`
@@ -48,7 +48,9 @@ export async function fetchLatestInvoices() {
     throw new Error('Failed to fetch the latest invoices.');
   }
 }
-
+// 并行获取数据获取,同时启动所有数据请求 【并行】
+// promise.all() 
+// promiseHooks.allSettled
 export async function fetchCardData() {
   try {
     // You can probably combine these into a single SQL query
@@ -60,7 +62,9 @@ export async function fetchCardData() {
          SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
          FROM invoices`;
+    // 使用Promise.all 来执行并发请求,同时可执行所有数据提取,将会导致性能提升
 
+    //
     const data = await Promise.all([
       invoiceCountPromise,
       customerCountPromise,
