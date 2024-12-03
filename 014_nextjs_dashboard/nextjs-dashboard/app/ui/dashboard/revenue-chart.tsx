@@ -1,15 +1,29 @@
+//工具函数 生成y标签
 import { generateYAxis } from '@/app/lib/utils';
+// 使用 @heroicons 提供的图标，用作 UI 装饰。
 import { CalendarIcon } from '@heroicons/react/24/outline';
+// 特定字体的样式。
 import { lusitana } from '@/app/ui/fonts';
+// 用于获取收入数据的异步函数 
+import { Revenue } from '@/app/lib/definitions'
 import { fetchRevenue } from '@/app/lib/data';
 
-export default async function RevenueChart() {
+// 	•	interface：用来定义一个接口，接口是 TypeScript 中的核心概念，用于描述对象的结构。
+	// •	RevenueChartProps：接口的名称，通常用来表示某个 React 组件的 props 类型。
+	// •	data: Revenue[]：
+	// •	data 是 props 中的一个字段名称。
+	// •	Revenue[] 表示 data 的类型是一个数组，数组的每个元素都必须是 Revenue 类型。
+interface RevenueChartProps {
+  data: Revenue[];
+}
+// 异步组件，使用 fetchRevenue() 来获取收入数据。//•	revenue 是数据源，假设是一个数组，每个元素包含收入和月份。
+export default async function RevenueChart({data}:RevenueChartProps) {
   const revenue = await fetchRevenue();
 
   const chartHeight = 350;
-  const { yAxisLabels, topLabel } = generateYAxis(revenue);
+  const { yAxisLabels, topLabel } = generateYAxis(data);
 
-  if (!revenue || revenue.length === 0) {
+  if (!data ||data.length === 0) {
     return <p className="mt-4 text-gray-400">No data available.</p>;
   }
 
