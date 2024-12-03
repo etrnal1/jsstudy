@@ -1,3 +1,7 @@
+
+// 添加fentch 
+
+import { fetchInvoicesPages } from '@/app/lib/data';
 // 添加搜索分页,为什么要使用URL搜索参数
 import Pagination from '@/app/ui/invoices/pagination';
 import Search from '@/app/ui/search';
@@ -20,8 +24,10 @@ export default async function Page(props:{
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
  
+    // 添加总的页面数据
 
-
+const totalPages = await fetchInvoicesPages(query)
+console.log("打印页面总条数",totalPages)
     //相关逻辑结束
   return (
     <div className="w-full">
@@ -36,7 +42,9 @@ export default async function Page(props:{
         <Table query={query} currentPage={currentPage} />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
-        {/* <Pagination totalPages={totalPages} /> */}
+        {/* 将totalPages传递给Pagination组件 */}
+        总页面
+        <Pagination totalPages={totalPages} />
       </div>
     </div>
   );
