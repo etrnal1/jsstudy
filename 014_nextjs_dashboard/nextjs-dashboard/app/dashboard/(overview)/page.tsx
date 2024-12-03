@@ -1,3 +1,3 @@
 export default function OverviewPage() {
-    return <h1>Dashboard Overview</h1>;
+    return <h1>Dashboard Overview Suspense</h1>;
   }
