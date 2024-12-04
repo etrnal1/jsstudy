@@ -49,3 +49,24 @@ export async function createInvoice(formData:FormData){
     // console.log(rawFormData,new Date());
     // console.log(typeof rawFormData.amout,new Date());
 }
+
+export async function updateInvoice (id:string,formData:FormData){
+    // 进行数据验证
+    const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+
+    // 获取id ,金额,状态
+    const { customerId, amount, status } = UpdateInvoice.parse({
+        customerId: formData.get('customerId'),
+        amount: formData.get('amount'),
+        status: formData.get('status'),
+      });
+    const amountInCents= amount * 100; 
+    await sql `
+    UPDATE invoices
+    SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+    WHERE id = ${id}
+    `;
+    revalidatePath('/dashboard/invoices');
+    redirect('/dashboard/invoices');  
+    console.log("我进行了香瓜参数边距")
+}

@@ -9,6 +9,9 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
+//导入编辑函数 @/app
+
+import { updateInvoice } from '@/app/lib/actions';
 
 export default function EditInvoiceForm({
   invoice,
@@ -16,9 +19,17 @@ export default function EditInvoiceForm({
 }: {
   invoice: InvoiceForm;
   customers: CustomerField[];
-}) {
+})
+
+
+{
+
+  // 相反，您可以使用 JS bind 将 id 传递给 Server Action。这将确保传递给 Server Action 的任何值都经过编码。
+  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
+  //注意：在表单中使用隐藏的输入字段也有效（例如 <input type="hidden" name="id" value={invoice.id} /> ）。但是，这些值将在 HTML 源中显示为完整文本，这对于 ID 等敏感数据来说并不理想。
   return (
-    <form>
+    // action提交
+    <form action={updateInvoiceWithId}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -120,4 +131,5 @@ export default function EditInvoiceForm({
       </div>
     </form>
   );
+  
 }
