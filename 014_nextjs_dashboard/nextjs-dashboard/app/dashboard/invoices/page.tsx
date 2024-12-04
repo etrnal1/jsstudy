@@ -43,7 +43,7 @@ console.log("打印页面总条数",totalPages)
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
         {/* 将totalPages传递给Pagination组件 */}
-        总页面
+      
         <Pagination totalPages={totalPages} />
       </div>
     </div>
