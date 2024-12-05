@@ -37,58 +37,40 @@ export type State ={
     message?:string|null;
 }
 //创建接受formData的新异步函数
-export async function createInvoice(preveState:State,formData:FormData){
-    // 新增有注释的函数
-    const validatedFields = CreateInvoice.safeParse({
+export async function createInvoice(prevState: State, formData: FormData) {
+    const rawFormData = {
         customerId: formData.get('customerId'),
         amount: formData.get('amount'),
         status: formData.get('status'),
-      });
+    };
 
-      if(!validatedFields.success){
+    // 验证表单数据
+    const validatedFields = CreateInvoice.safeParse(rawFormData);
+
+    if (!validatedFields.success) {
         return {
-            errors:validatedFields.error.flatten().fieldErrors,
-            message:"重要字段没填写,创建表格实现"
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: "重要字段没填写,创建表格失败"
         }
-      }
+    }
 
-      // 验证完后 提那相关
-      const {customerId,amount,status} = validatedFields.data;
+    const { customerId, amount, status } = validatedFields.data;
+    const amountInCents = amount * 100;
+    const date = new Date().toISOString().split('T')[0];
 
-    // 注释Zod pase 函数
-    // const { customerId, amount, status } = CreateInvoice.parse({
-    //     customerId: formData.get('customerId'),
-    //     amount: formData.get('amount'),
-    //     status: formData.get('status'),
-    //   });
-    const amountInCents= amount * 100;
-
-    const date =new Date().toISOString().split('T')[0];
-    // sql 导入相关数据
-    try{
-        await sql `
+    try {
+        await sql`
         INSERT INTO invoices (customer_id, amount, status, date)
         VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
         `;
-    }catch(error){
+        
+        revalidatePath('/dashboard/invoices');
+        redirect('/dashboard/invoices');
+    } catch (error) {
         return {
             message: 'Database Error: failed to create invoice'
         }
     }
-   
-    revalidatePath('/dashboard/invoices');
-    
-    redirect('/dashboard/invoices');
-
-    // 获取form属性
-    // const rawFormData ={
-    //     customeId:formData.get('customeId'),
-    //     amout:formData.get('amout'),
-    //     status:formData.get('status'),
-    // };
-
-    // console.log(rawFormData,new Date());
-    // console.log(typeof rawFormData.amout,new Date());
 }
 
 export async function updateInvoice (id:string,formData:FormData){
