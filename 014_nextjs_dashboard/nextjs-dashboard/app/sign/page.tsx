@@ -1,5 +1,5 @@
 // 添加登录页面
-import LoginForm from '@/app/ui/login-form';
+import SignForm from '@/app/ui/sign-form';
 import AcmeLogo from '../ui/acme-logo';
 export default function LoginPage(){
     return (
@@ -10,7 +10,7 @@ export default function LoginPage(){
                         <AcmeLogo />
                     </div>
                 </div>
-                <LoginForm />
+                <SignForm />
             </div>
            
         </main>

@@ -122,3 +122,24 @@ export async function authenticate(
       throw error;
     }
   }
+
+
+//   signCreate
+
+export async function signCreate(formData: FormData){
+    console.log("点击用户进行注册",FormData)
+    const username= formData.get('email')
+    const password= formData.get('password')
+    console.log("点击用户进行注册",username,password)
+    // sql 语句 加密方式hash 
+    // await sql`
+    // INSERT INTO invoices (customer_id, amount, status, date)
+    // VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+    // `;
+    //customers
+
+    const result = await sql`
+    select * from customers limit 5;
+    `
+    console.log("打印查询到的表结果:",result);
+}
