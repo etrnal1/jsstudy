@@ -9,16 +9,16 @@ import {
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
-import { useFormState } from 'react-dom'; // 修改: 使用正确的 useFormState hook
+import { useActionState } from 'react'; // 修改: 使用 useActionState
 import { createInvoice } from '@/app/lib/actions';
 
 export default function Form({ customers }: { customers: CustomerField[] }) {
-  // 修改: 使用 useFormState 替代 useActionState
-  // useFormState 接收两个参数:
+  // 修改: 使用 useActionState 替代 useFormState
+  // useActionState 接收两个参数:
   // 1. action 函数
   // 2. 初始状态
   const initialState = { message: null, errors: { customerId: [], amount: [], status: [] } };
-  const [state, dispatch] = useFormState(createInvoice, initialState);
+  const [state, dispatch] = useActionState(createInvoice, initialState);
 
   return (
     <form action={dispatch}>
