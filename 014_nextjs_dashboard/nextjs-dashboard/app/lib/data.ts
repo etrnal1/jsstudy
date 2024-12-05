@@ -144,7 +144,7 @@ export async function fetchInvoicesPages(query: string) {
     throw new Error('Failed to fetch total number of invoices.');
   }
 }
-
+// 查询相关函数
 export async function fetchInvoiceById(id: string) {
   try {
     const data = await sql<InvoiceForm>`
@@ -166,7 +166,7 @@ export async function fetchInvoiceById(id: string) {
     return invoice[0];
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoice.');
+    throw new Error('请求网络资源发生错误.');
   }
 }
 

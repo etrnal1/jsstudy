@@ -74,6 +74,8 @@ export async function updateInvoice (id:string,formData:FormData){
 
 export async function deleteInvoice (id:string){
     console.log(`已成功删除发票 ID: ${id}`);
+
+  
     await sql`DELETE FROM invoices WHERE id = ${id}`;
     revalidatePath('/dashboard/invoices');
     
