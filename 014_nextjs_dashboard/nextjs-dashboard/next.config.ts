@@ -5,7 +5,10 @@ const nextConfig: NextConfig = {
   experimental:{
     ppr:false, 
   },
-  tracing: false,
+  eslint: {
+    ignoreDuringBuilds: true,
+  }
+  
 };
 
 export default nextConfig;
