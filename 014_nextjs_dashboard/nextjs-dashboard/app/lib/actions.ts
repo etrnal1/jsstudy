@@ -13,28 +13,69 @@ import { redirect } from 'next/navigation';
 
 const FormSchema = z.object({
     id:z.string(),
-    customerId:z.string(),
-    amount:z.coerce.number(),
-    status:z.enum(['pending','paid']),
+    customerId:z.string({
+        invalid_type_error:'请选择一个选项'
+    }),
+    amount:z.coerce
+            .number()
+            .gt(0,{message:"请输入一个金额"}),
+    status:z.enum(['pending','paid'],{
+        invalid_type_error:'请选择一个用户状态'
+    }),
     date:z.string(),
 });
 const CreateInvoice= FormSchema.omit({id:true,date:true})
+
+// 定义一个State 类型
+export type State ={
+    errors:{
+        customerId?:string[];
+        amount?: string[];
+        status: string[];
+
+    };
+    message?:string|null;
+}
 //创建接受formData的新异步函数
-export async function createInvoice(formData:FormData){
-    const { customerId, amount, status } = CreateInvoice.parse({
+export async function createInvoice(preveState:State,formData:FormData){
+    // 新增有注释的函数
+    const validatedFields = CreateInvoice.safeParse({
         customerId: formData.get('customerId'),
         amount: formData.get('amount'),
         status: formData.get('status'),
       });
+
+      if(!validatedFields.success){
+        return {
+            errors:validatedFields.error.flatten().fieldErrors,
+            message:"重要字段没填写,创建表格实现"
+        }
+      }
+
+      // 验证完后 提那相关
+      const {customerId,amount,status} = validatedFields.data;
+
+    // 注释Zod pase 函数
+    // const { customerId, amount, status } = CreateInvoice.parse({
+    //     customerId: formData.get('customerId'),
+    //     amount: formData.get('amount'),
+    //     status: formData.get('status'),
+    //   });
     const amountInCents= amount * 100;
 
     const date =new Date().toISOString().split('T')[0];
     // sql 导入相关数据
-
-    await sql `
-    INSERT INTO invoices (customer_id, amount, status, date)
-    VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-    `;
+    try{
+        await sql `
+        INSERT INTO invoices (customer_id, amount, status, date)
+        VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+        `;
+    }catch(error){
+        return {
+            message: 'Database Error: failed to create invoice'
+        }
+    }
+   
     revalidatePath('/dashboard/invoices');
     
     redirect('/dashboard/invoices');
@@ -73,10 +114,7 @@ export async function updateInvoice (id:string,formData:FormData){
 // 添加删除按钮
 
 export async function deleteInvoice (id:string){
-    console.log(`已成功删除发票 ID: ${id}`);
-
-  
     await sql`DELETE FROM invoices WHERE id = ${id}`;
-    revalidatePath('/dashboard/invoices');
-    
+    // 重定向
+    revalidatePath('/dashboard/invoices');   
 }
