@@ -1,6 +1,7 @@
 'use server';
 //获取验证组件
-
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
 import {z}  from 'zod';
 import {sql} from '@vercel/postgres';
 //于将 Route Segments 存储在用户的浏览器中一段时间。除了预取之外，此缓存还确保用户可以在路由之间快速导航，同时减少向服务器发出的请求数,由于您正在更新 invoices 路由中显示的数据，因此您需要清除此缓存并触发对服务器的新请求。您可以使用 Next.js 中的 revalidatePath 函数执行此操作：
@@ -100,3 +101,24 @@ export async function deleteInvoice (id:string){
     // 重定向
     revalidatePath('/dashboard/invoices');   
 }
+//定义登录函数
+
+
+export async function authenticate(
+    prevState: string | undefined,
+    formData: FormData,
+  ) {
+    try {
+      await signIn('credentials', formData);
+    } catch (error) {
+      if (error instanceof AuthError) {
+        switch (error.type) {
+          case 'CredentialsSignin':
+            return 'Invalid credentials.';
+          default:
+            return 'Something went wrong.';
+        }
+      }
+      throw error;
+    }
+  }
