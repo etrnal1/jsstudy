@@ -1,4 +1,5 @@
 'use server';
+import bcrypt from 'bcrypt';
 //获取验证组件
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
@@ -126,20 +127,34 @@ export async function authenticate(
 
 //   signCreate
 
-export async function signCreate(formData: FormData){
-    console.log("点击用户进行注册",FormData)
-    const username= formData.get('email')
-    const password= formData.get('password')
-    console.log("点击用户进行注册",username,password)
-    // sql 语句 加密方式hash 
-    // await sql`
-    // INSERT INTO invoices (customer_id, amount, status, date)
-    // VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-    // `;
-    //customers
+export async function signCreate(prevState: any, formData: FormData) {
+  try {
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    
+    console.log("用户注册信息:", email, password);
+    
+    // 查询用户是否已存在
+    const existingUser = await sql`
+      SELECT * FROM users WHERE email = ${email}
+    `;
 
-    const result = await sql`
-    select * from customers limit 5;
-    `
-    console.log("打印查询到的表结果:",result);
+    if (existingUser.rows.length > 0) {
+      return "用户已存在";
+    }
+
+    // 对密码进行加密
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 插入新用户
+    await sql`
+      INSERT INTO users (id, email, password, name)
+      VALUES (${crypto.randomUUID()}, ${email}, ${hashedPassword}, ${email})
+    `;
+
+    return "注册成功";
+  } catch (error) {
+    console.error("注册错误:", error);
+    return "注册失败，请稍后重试";
+  }
 }

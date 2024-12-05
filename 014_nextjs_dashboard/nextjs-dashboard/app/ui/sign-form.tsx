@@ -8,20 +8,23 @@ import {
 } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from './button';
-// 新增用户状态和登录
-
 import { useActionState } from 'react';
 import { signCreate } from '@/app/lib/actions';
-export default function LoginForm() {
-  // 新增注册验证逻辑
-  const [errorMessage, dispatch] = useActionState(signCreate, undefined);
 
-// 返回页面模版
+export default function LoginForm() {
+  const [message, dispatch] = useActionState(signCreate, null);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    dispatch(formData);
+  };
+
   return (
-    <form action={signCreate}   className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
         <h1 className={`${lusitana.className} mb-3 text-2xl`}>
-         请注册
+          请注册
         </h1>
         <div className="w-full">
           <div>
@@ -65,19 +68,16 @@ export default function LoginForm() {
           </div>
         </div>
         <Button className="mt-4 w-full">
-         点击注册 <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
+          点击注册 <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>
-        <div className="flex h-8 items-end space-x-1" aria-live="polite"
-          aria-atomic="true">
-          {/* Add form errors here */}
-          {errorMessage && (
-            <>
-              <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
-              <p className="text-sm text-red-500">{errorMessage}</p>
-            </>
-          )}
-
-        </div>
+        
+        {message && (
+          <div className={`mt-4 p-2 rounded ${
+            message === "注册成功" ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+          }`}>
+            {message}
+          </div>
+        )}
       </div>
     </form>
   );
