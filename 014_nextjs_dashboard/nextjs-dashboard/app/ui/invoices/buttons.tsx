@@ -1,6 +1,7 @@
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-
+// 导出删除按钮
+import {deleteInvoice} from '@/app/lib/actions';
 export function CreateInvoice() {
   return (
     <Link
@@ -24,13 +25,22 @@ export function UpdateInvoice({ id }: { id: string }) {
   );
 }
 
+// 删除发票功能
 export function DeleteInvoice({ id }: { id: string }) {
+  // bind 将id 传递给服务器操作
+  const deleteInvoiceWithId = deleteInvoice.bind(null,id);
   return (
     <>
+    {/* 提交改函数 */}
+    <form action={deleteInvoiceWithId}
+    
+    
+    >
       <button className="rounded-md border p-2 hover:bg-gray-100">
         <span className="sr-only">Delete</span>
         <TrashIcon className="w-5" />
       </button>
+    </form>
     </>
   );
 }

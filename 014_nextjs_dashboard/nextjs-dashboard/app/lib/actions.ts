@@ -68,5 +68,13 @@ export async function updateInvoice (id:string,formData:FormData){
     `;
     revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');  
-    console.log("我进行了香瓜参数边距")
+    
+}
+// 添加删除按钮
+
+export async function deleteInvoice (id:string){
+    console.log(`已成功删除发票 ID: ${id}`);
+    await sql`DELETE FROM invoices WHERE id = ${id}`;
+    revalidatePath('/dashboard/invoices');
+    
 }
