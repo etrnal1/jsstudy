@@ -109,7 +109,8 @@ export default async function InvoicesTable({
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                      更新按钮
+                      {/* 编辑更新组件 */}
+                    
                       <UpdateInvoice id={invoice.id} />
                       <DeleteInvoice id={invoice.id} />
                     </div>

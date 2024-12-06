@@ -2,7 +2,7 @@
 import {
   UserGroupIcon,
   HomeIcon,
-  DocumentDuplicateIcon,
+  DocumentDuplicateIcon,AdjustmentsVerticalIcon
 } from '@heroicons/react/24/outline';
 import {usePathname} from 'next/navigation';
 // clsx 导入页面
@@ -11,13 +11,14 @@ import Link from 'next/link';
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
 const links = [
-  { name: 'Home', href: '/dashboard', icon: HomeIcon },
+  { name: '主页', href: '/dashboard', icon: HomeIcon },
   {
-    name: 'Invoices',
+    name: '发票',
     href: '/dashboard/invoices',
     icon: DocumentDuplicateIcon,
   },
-  { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
+  { name: '消费者', href: '/dashboard/customers', icon: UserGroupIcon },
+  {name: '发表文章',href:'/dashboard/test',icon:AdjustmentsVerticalIcon},
 ];
 
 export default function NavLinks() {
