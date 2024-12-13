@@ -182,3 +182,14 @@ git rebase --abort
 
 # 完成后推送修改到远程
 git push origin master --force
+
+
+按照公式来解这道题，我们可以使用 反向概率法 和排列组合公式，以下是详细解题过程：
+
+    1. 总排列数
+
+4个人（A_1, A_2, B_1, B_2）的排列总数是：
+
+4! = 4 \times 3 \times 2 \times 1 = 24
+
+
