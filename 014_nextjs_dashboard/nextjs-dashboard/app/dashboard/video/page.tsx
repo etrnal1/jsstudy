@@ -59,6 +59,7 @@ export default function VideoPage() {
       // 创建新的预览URL
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+      // 通过他保存文件
       setVideoFile(file);
       setDownloadUrl(''); // 清除之前的下载链接
       setProcessedVideoUrl(''); // 清除之前的处理后视频预览
@@ -120,80 +121,81 @@ export default function VideoPage() {
 
       const formData = new FormData();
       formData.append('video', videoFile);
-
+      
+      // 调用视频处理接口
       const url = `/api/video/cut?startTime=${encodeURIComponent(startTimeStr)}&duration=${duration}`;
       console.log(`发送请求到: ${url}`);
+      addLog(`发送请求到: ${url}`);
 
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formData,
-        signal: abortControllerRef.current.signal
-      });
-      console.log('收到响应:', response);
-      console.log('收到响应，状态码:', response.status);
+      try {
+        console.log('准备发送请求...');
+        console.log('FormData contents:', Array.from(formData.entries()));
+        console.log('Video file:', videoFile);
+        
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Accept': 'text/event-stream',
+          },
+          signal: abortControllerRef.current.signal
+        });
 
-      if (!response.ok) {
-        console.log('响应不正常，状态码:', response.status);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        console.log('无法获取响应流');
-        throw new Error('无法获取响应流');
-      }
-
-      console.log('开始读取响应流');
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) {
-          console.log('响应流已结束');
-          break;
+        // 检查响应头
+        console.log('Content-Type:', response.headers.get('Content-Type'));
+        
+        if (!response.body) {
+          throw new Error('响应体为空');
         }
 
-        buffer += decoder.decode(value, { stream: true });
-        let boundary = buffer.indexOf('\n\n');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
 
-        while (boundary !== -1) {
-          const message = buffer.slice(0, boundary).trim();
-          buffer = buffer.slice(boundary + 2);
-
-          console.log('解析消息:', message);
-          addLog(message)
-
-          if (message.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(message.slice(6));
-              console.log('收到的数据:', data);
-
-              if (data.error) {
-                console.log('收到错误:', data.error);
-                addLog(`错误: ${data.error}`);
-                throw new Error(data.error);
-              }
-              // 前端需要使用 EventSource 来监听从后端发送的 SSE 消息。EventSource 是浏览器原生支持的一种 API，用于接收服务器推送的事件流。
-              if (data.status === 'complete' && data.downloadUrl) {
-                const fullDownloadUrl = `${window.location.origin}${data.downloadUrl}`;
-                console.log('设置下载链接:', fullDownloadUrl);
-                addLog('设置下载链接:')
-                addLog(fullDownloadUrl)
-                setDownloadUrl(fullDownloadUrl);
-                setProcessedVideoUrl(fullDownloadUrl);
-                addLog('视频处理完成，可以预览和下载了');
-                setIsProcessing(false); // 处理完成时设置状态
-              }
-            } catch (e: any) {
-              console.error('解析数据失败:', e);
-              addLog(`错误: ${e.message}`);
-              setIsProcessing(false); // 发生错误时设置状态
-            }
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            console.log('数据流读取完成');
+            break;
           }
 
-          boundary = buffer.indexOf('\n\n');
+          const chunk = decoder.decode(value, { stream: true });
+          console.log('收到数据块:', chunk);
+
+          // 尝试解析每个事件
+          const events = chunk.split('\n\n').filter(Boolean);
+          for (const event of events) {
+            if (event.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(event.slice(6));
+                console.log('解析的事件数据:', data);
+                
+                if (data.error) {
+                  throw new Error(data.error);
+                }
+                
+                if (data.progress) {
+                  addLog(`处理进度: ${data.progress}%`);
+                }
+                
+                if (data.status === 'complete') {
+                  addLog('处理完成');
+                  if (data.downloadUrl) {
+                    setDownloadUrl(`${window.location.origin}${data.downloadUrl}`);
+                    setProcessedVideoUrl(`${window.location.origin}${data.downloadUrl}`);
+                  }
+                }
+              } catch (e) {
+                console.error('解析事件数据失败:', e);
+                addLog(`解析错误: ${e.message}`);
+              }
+            }
+          }
         }
+      } catch (error: any) {
+        console.error('处理失败:', error);
+        addLog(`错误: ${error.message}`);
+      } finally {
+        setIsProcessing(false);
       }
     } catch (error: any) {
       console.error('处理错误:', error);
@@ -208,7 +210,7 @@ export default function VideoPage() {
         <h1 className={`${lusitana.className} text-2xl`}>视频剪切工具</h1>
       </div>
       <div className="mt-4 flex flex-col gap-4">
-        {/* 文件选择 */}
+        {/* 文件选择  handleFileChange 来处理 ���取文件*/}
         <div>
           <label className="block mb-2 text-sm font-medium">选择视频文件</label>
           <input
@@ -277,14 +279,14 @@ export default function VideoPage() {
           </div>
         </div>
 
-        {/* 处理按钮 */}
+        {/* 点击处理按钮把函数提交 */}
         <div className="mt-4 flex gap-4">
           <button
             onClick={handleCutVideo}
             className="w-full p-2 text-white bg-blue-500 rounded-lg disabled:bg-gray-400"
             disabled={isProcessing || !videoFile || !startTimeStr || !endTimeStr}
           >
-            {isProcessing ? '处理中...' : '剪切视频'}
+            {isProcessing ? '��理中...' : '剪切视频'}
           </button>
         </div>
 
