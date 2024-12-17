@@ -52,14 +52,14 @@ export default function VideoPage() {
 
       addLog(`开始处理视频... 从 ${startTimeStr} 到 ${endTimeStr} (持续 ${secondsToTime(duration)})`);
       
-      const formData = new FormData();
-      formData.append('video', videoFile);
-      formData.append('startTime', startTimeStr);
-      formData.append('duration', duration.toString());
-
-      const response = await fetch('/api/video/cut', {
+      const url = `/api/video/cut?startTime=${encodeURIComponent(startTimeStr)}&duration=${duration}`;
+      
+      const response = await fetch(url, {
         method: 'POST',
-        body: formData,
+        body: videoFile,
+        headers: {
+          'Content-Type': videoFile.type,
+        },
       });
 
       if (!response.ok) {
@@ -68,18 +68,18 @@ export default function VideoPage() {
       }
 
       const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      const downloadUrl = URL.createObjectURL(blob);
       
       const downloadLink = document.createElement('a');
-      downloadLink.href = url;
+      downloadLink.href = downloadUrl;
       downloadLink.download = `cut_${videoFile.name}`;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(downloadUrl);
 
       addLog('视频处理完成，开始下载');
-    } catch (error) {
+    } catch (error: any) {
       addLog(`错误: ${error.message}`);
     }
   };

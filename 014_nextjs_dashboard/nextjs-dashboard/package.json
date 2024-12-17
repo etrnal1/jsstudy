@@ -14,6 +14,7 @@
     "clsx": "^2.1.1",
     "ffmpeg": "^0.0.4",
     "fluent-ffmpeg": "^2.1.3",
+    "formidable": "^3.5.2",
     "lexical-react-rte": "^0.1.70",
     "next": "15.0.4-canary.34",
     "next-auth": "5.0.0-beta.25",

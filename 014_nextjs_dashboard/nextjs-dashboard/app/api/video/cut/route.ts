@@ -2,68 +2,73 @@ import { NextResponse } from 'next/server';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    const videoFile = formData.get('video') as File;
-    const startTime = formData.get('startTime') as string;
-    const duration = formData.get('duration') as string;
+    // 从 URL 参数获取时间信息
+    const url = new URL(request.url);
+    const startTime = url.searchParams.get('startTime') || '00:00:00';
+    const duration = parseInt(url.searchParams.get('duration') || '0');
 
-    if (!videoFile) {
+    if (!startTime || duration <= 0) {
       return NextResponse.json(
-        { error: '没有上传视频文件' },
+        { error: '无效的时间参数' },
         { status: 400 }
       );
     }
 
-    // 生成安全的文件名（只使用时间戳）
-    const timestamp = Date.now();
-    const inputFileName = `input-${timestamp}.mp4`;
-    const outputFileName = `output-${timestamp}.mp4`;
-
-    // 创建临时文件路径
+    // 创建临时目录
     const tempDir = path.join(process.cwd(), 'tmp');
-    const inputPath = path.join(tempDir, inputFileName);
-    const outputPath = path.join(tempDir, outputFileName);
+    const timestamp = Date.now();
+    const inputPath = path.join(tempDir, `input-${timestamp}.mp4`);
+    const outputPath = path.join(tempDir, `output-${timestamp}.mp4`);
 
-    // 确保临时目录存在
     await require('fs').promises.mkdir(tempDir, { recursive: true });
 
-    // 将上传的文件写入临时文件
-    const bytes = await videoFile.arrayBuffer();
-    await writeFile(inputPath, Buffer.from(bytes));
+    // 获取视频数据并写入临时文件
+    const videoData = await request.arrayBuffer();
+    await writeFile(inputPath, Buffer.from(videoData));
 
-    // 使用 FFmpeg 处理视频
+    // 处理视频
     await new Promise((resolve, reject) => {
       ffmpeg(inputPath)
         .setStartTime(startTime)
         .setDuration(duration)
+        .outputOptions([
+          '-c:v libx264',     // 使用 H.264 编码
+          '-c:a aac',         // 使用 AAC 音频编码
+          '-strict experimental',
+          '-movflags +faststart'  // 优化网络播放
+        ])
         .output(outputPath)
-        .on('end', resolve)
-        .on('error', reject)
+        .on('start', (commandLine) => {
+          console.log('FFmpeg 开始处理:', commandLine);
+        })
+        .on('progress', (progress) => {
+          console.log('处理进度:', progress.percent, '%');
+        })
+        .on('end', () => {
+          console.log('FFmpeg 处理完成');
+          resolve(true);
+        })
+        .on('error', (err) => {
+          console.error('FFmpeg 错误:', err);
+          reject(err);
+        })
         .run();
     });
 
-    // 读取处理后的视频
+    // 读取输出文件
     const outputBuffer = await require('fs').promises.readFile(outputPath);
 
     // 清理临时文件
     await require('fs').promises.unlink(inputPath);
     await require('fs').promises.unlink(outputPath);
 
-    // 生成安全的下载文件名（使用 encodeURIComponent 来处理特殊字符）
-    const safeFileName = `cut-${encodeURIComponent(videoFile.name)}`;
-
-    // 返回处理后的视频
     return new NextResponse(outputBuffer, {
       headers: {
         'Content-Type': 'video/mp4',
-        'Content-Disposition': `attachment; filename="${safeFileName}"`
+        'Content-Disposition': `attachment; filename="cut-video-${timestamp}.mp4"`
       }
     });
 

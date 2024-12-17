@@ -5,36 +5,35 @@ import ffmpeg from 'fluent-ffmpeg';
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    const videoFile = formData.get('video') as File;
-    const startTime = formData.get('startTime') as string;
-    const duration = formData.get('duration') as string;
-
-    if (!videoFile) {
+    // 使用 Request.blob() 替代 formData()
+    const data = await request.blob();
+    const contentType = request.headers.get('content-type') || '';
+    
+    if (!contentType.includes('multipart/form-data')) {
       return NextResponse.json(
-        { error: '没有上传视频文件' },
+        { error: '无效的内容类型' },
         { status: 400 }
       );
     }
 
-    // 生成安全的文件名（只使用时间戳）
-    const timestamp = Date.now();
-    const inputFileName = `input-${timestamp}.mp4`;
-    const outputFileName = `output-${timestamp}.mp4`;
+    // 从 URL 参数获取时间信息
+    const url = new URL(request.url);
+    const startTime = url.searchParams.get('startTime') || '00:00:00';
+    const duration = url.searchParams.get('duration') || '0';
 
-    // 创建临时文件路径
+    // 创建临时文件
     const tempDir = path.join(process.cwd(), 'tmp');
-    const inputPath = path.join(tempDir, inputFileName);
-    const outputPath = path.join(tempDir, outputFileName);
+    const timestamp = Date.now();
+    const inputPath = path.join(tempDir, `input-${timestamp}.mp4`);
+    const outputPath = path.join(tempDir, `output-${timestamp}.mp4`);
 
     // 确保临时目录存在
     await require('fs').promises.mkdir(tempDir, { recursive: true });
 
-    // 将上传的文件写入临时文件
-    const bytes = await videoFile.arrayBuffer();
-    await writeFile(inputPath, Buffer.from(bytes));
+    // 写入临时文件
+    await writeFile(inputPath, Buffer.from(await data.arrayBuffer()));
 
-    // 使用 FFmpeg 处理视频
+    // 处理视频
     await new Promise((resolve, reject) => {
       ffmpeg(inputPath)
         .setStartTime(startTime)
@@ -45,21 +44,17 @@ export async function POST(request: Request) {
         .run();
     });
 
-    // 读取处理后的视频
+    // 读取输出文件
     const outputBuffer = await require('fs').promises.readFile(outputPath);
 
     // 清理临时文件
     await require('fs').promises.unlink(inputPath);
     await require('fs').promises.unlink(outputPath);
 
-    // 生成安全的下载文件名（移除特殊字符）
-    const safeFileName = `cut_video_${timestamp}.mp4`;
-
-    // 返回处理后的视频
     return new NextResponse(outputBuffer, {
       headers: {
         'Content-Type': 'video/mp4',
-        'Content-Disposition': `attachment; filename="${safeFileName}"`
+        'Content-Disposition': `attachment; filename="cut-video-${timestamp}.mp4"`
       }
     });
 
