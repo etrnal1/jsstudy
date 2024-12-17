@@ -1,3 +1,4 @@
+// 处理导航栏的逻辑
 'use client'
 import {
   UserGroupIcon,
@@ -19,6 +20,7 @@ const links = [
   },
   { name: '消费者', href: '/dashboard/customers', icon: UserGroupIcon },
   {name: '发表文章',href:'/dashboard/test',icon:AdjustmentsVerticalIcon},
+  {name: '处理视频',href:'/dashboard/video',icon:AdjustmentsVerticalIcon},
 ];
 
 export default function NavLinks() {

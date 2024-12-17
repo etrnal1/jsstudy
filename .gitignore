@@ -1,3 +1,5 @@
 013_nextjs/node_modules/*
 013_nextjs/.next/*
 ps/PS基础入门课程素材/*
+014_nextjs_dashboard/node_modules/.pnpm/@types+node@22.10.1/node_modules/@types/node/index.d.ts
+/014_nextjs_dashboard/nextjs-dashboard/node_modules
