@@ -1,12 +1,21 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
-import ffmpeg from 'fluent-ffmpeg';
 import { writeFile } from 'fs/promises';
-import { mkdir } from 'fs/promises';
+import { mkdir as fsMkdir } from 'fs/promises';
+import { stat } from 'fs/promises';
+import path from 'path';
+import { spawn } from 'child_process';
 
 export async function POST(request: Request) {
   const responseStream = new TransformStream();
   const writer = responseStream.writable.getWriter();
+  let inputPath = '';
+  let outputPath = '';
+
+  const writeToStream = async (data: any) => {
+    await writer.write(
+      new TextEncoder().encode(`data: ${JSON.stringify(data)}\n\n`)
+    );
+  };
   
   try {
     const url = new URL(request.url);
@@ -17,95 +26,82 @@ export async function POST(request: Request) {
 
     // 创建临时目录
     const tempDir = path.join(process.cwd(), 'tmp');
-    await mkdir(tempDir, { recursive: true });
+    await fsMkdir(tempDir, { recursive: true });
 
     // 生成临时文件路径
     const timestamp = Date.now();
-    const inputPath = path.join(tempDir, `input-${timestamp}.mp4`);
-    const outputPath = path.join(tempDir, `output-${timestamp}.mp4`);
+    inputPath = path.join(tempDir, `input-${timestamp}.mp4`);
+    outputPath = path.join(tempDir, `output-${timestamp}.mp4`);
 
-    // 保存上传的视频到临时文件
-    const arrayBuffer = await request.arrayBuffer();
+    // 处理 FormData
+    const formData = await request.formData();
+    const file = formData.get('video');
+    
+    if (!file || !(file instanceof Blob)) {
+      throw new Error('没有收到有效的视频文件');
+    }
+
+    // 将文件内容转换为 Buffer 并写入文件
+    const arrayBuffer = await file.arrayBuffer();
     await writeFile(inputPath, Buffer.from(arrayBuffer));
 
     console.log('视频文件已保存:', inputPath);
+    const stats = await stat(inputPath);
+    console.log('输入文件大小:', stats.size);
 
+    if (stats.size === 0) {
+      throw new Error('输入文件大小为0');
+    }
+
+    // 构建 FFmpeg 命令
+    const ffmpegCommand = `ffmpeg -ss ${startTime} -i ${inputPath} -t ${duration} -c:v libx264 -c:a aac -movflags +faststart -y ${outputPath}`;
+    console.log('FFmpeg 命令:', ffmpegCommand);
+
+    // 执行 FFmpeg
+    const ffmpeg = spawn('ffmpeg', [
+      '-ss', startTime,
+      '-i', inputPath,
+      '-t', duration.toString(),
+      '-c:v', 'libx264',
+      '-c:a', 'aac',
+      '-movflags', '+faststart',
+      '-y',
+      outputPath
+    ]);
+
+    // 处理进度
+    ffmpeg.stderr.on('data', (data) => {
+      console.log('FFmpeg stderr:', data.toString());
+      writeToStream({ progress: 50 }); // 这里可以添加实际的进度计算
+    });
+
+    // 等待处理完成
     await new Promise((resolve, reject) => {
-      let progress = 0;
-
-      const command = ffmpeg(inputPath)
-        .inputOptions([`-ss ${startTime}`])
-        .duration(duration)
-        .output(outputPath)
-        .outputOptions([
-          '-c:v copy',
-          '-c:a copy',
-          '-movflags +faststart'
-        ]);
-
-      // 添加所有事件监听器
-      command.on('start', (commandLine) => {
-        console.log('FFmpeg 开始处理:', commandLine);
-        writer.write(
-          new TextEncoder().encode(
-            `data: ${JSON.stringify({ status: 'start' })}\n\n`
-          )
-        );
-      });
-
-      command.on('progress', (progressData) => {
-        progress = progressData.percent;
-        console.log('处理进度:', progress);
-        writer.write(
-          new TextEncoder().encode(
-            `data: ${JSON.stringify({ progress })}\n\n`
-          )
-        );
-      });
-
-      command.on('stderr', (stderrLine) => {
-        console.log('FFmpeg stderr:', stderrLine);
-      });
-
-      command.on('error', (err, stdout, stderr) => {
-        console.error('FFmpeg 错误:', err);
-        console.error('FFmpeg stdout:', stdout);
-        console.error('FFmpeg stderr:', stderr);
-        reject(err);
-      });
-
-      command.on('end', async (stdout, stderr) => {
-        console.log('FFmpeg 处理完成');
-        try {
-          // 读取处理后的文件
-          const outputBuffer = await require('fs').promises.readFile(outputPath);
-          
-          // 发送完成消息
-          writer.write(
-            new TextEncoder().encode(
-              `data: ${JSON.stringify({ 
-                status: 'complete',
-                data: outputBuffer.toString('base64')
-              })}\n\n`
-            )
-          );
-          
-          // 清理临时文件
-          await require('fs').promises.unlink(inputPath);
-          await require('fs').promises.unlink(outputPath);
-          
-          writer.close();
-          resolve(true);
-        } catch (error) {
-          reject(error);
+      ffmpeg.on('close', async (code) => {
+        if (code === 0) {
+          console.log('FFmpeg 处理完成');
+          // 生成下载链接
+          const downloadUrl = `/tmp/output-${timestamp}.mp4`;
+          await writeToStream({ 
+            status: 'complete',
+            downloadUrl,
+            progress: 100 
+          });
+          resolve(null);
+        } else {
+          console.error('FFmpeg 进程退出，代码:', code);
+          reject(new Error(`FFmpeg 进程退出，代码: ${code}`));
         }
       });
 
-      // 运行命令
-      command.run();
+      ffmpeg.on('error', (err) => {
+        console.error('FFmpeg 错误:', err);
+        reject(err);
+      });
     });
 
-    return new Response(responseStream.readable, {
+    await writer.close();
+    return new NextResponse(responseStream.readable, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -113,16 +109,11 @@ export async function POST(request: Request) {
       },
     });
 
-  } catch (error) {
-    console.error('视频处理错误:', error);
-    writer.write(
-      new TextEncoder().encode(
-        `data: ${JSON.stringify({ error: (error as Error).message })}\n\n`
-      )
-    );
-    writer.close();
-    
-    return new Response(responseStream.readable, {
+  } catch (error: any) {
+    console.error('处理错误:', error);
+    await writeToStream({ error: error.message });
+    await writer.close();
+    return new NextResponse(responseStream.readable, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -130,4 +121,4 @@ export async function POST(request: Request) {
       },
     });
   }
-} 
+}
