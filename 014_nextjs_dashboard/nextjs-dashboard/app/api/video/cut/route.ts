@@ -2,81 +2,109 @@ import { NextResponse } from 'next/server';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
+import { Readable } from 'stream';
+import { TransformStream } from 'stream/web'; // 确保导入 TransformStream
 
 export async function POST(request: Request) {
+  const responseStream = new TransformStream();
+  const writer = responseStream.writable.getWriter();
+
   try {
-    // 从 URL 参数获取时间信息
+    console.log("获取数据打印", new Date());
+
+    // 使用 arrayBuffer 读取整个请求体
+    const arrayBuffer = await request.arrayBuffer();
+    // 发现命令没有执行，检查，传递过来的传输体 是否有相应长度.
+    const buffer = Buffer.from(arrayBuffer);
+    console.log("请求体长度:", buffer.length);
+    //return 0;
+    // 获取参数
     const url = new URL(request.url);
     const startTime = url.searchParams.get('startTime') || '00:00:00';
     const duration = parseInt(url.searchParams.get('duration') || '0');
 
-    if (!startTime || duration <= 0) {
-      return NextResponse.json(
-        { error: '无效的时间参数' },
-        { status: 400 }
-      );
-    }
-
     // 创建临时目录
     const tempDir = path.join(process.cwd(), 'tmp');
+    await require('fs').promises.mkdir(tempDir, { recursive: true });
+
+    // 生成临时文件路径
     const timestamp = Date.now();
     const inputPath = path.join(tempDir, `input-${timestamp}.mp4`);
     const outputPath = path.join(tempDir, `output-${timestamp}.mp4`);
 
-    await require('fs').promises.mkdir(tempDir, { recursive: true });
+    // 将缓冲区写入输入文件
+    await writeFile(inputPath, buffer);
+    console.log("输入文件已写入:", inputPath);
 
-    // 获取视频数据并写入临时文件
-    const videoData = await request.arrayBuffer();
-    await writeFile(inputPath, Buffer.from(videoData));
+    // 后台打印 ffmpeg 命令
+    console.log('FFmpeg 开始处理:', `ffmpeg -ss ${startTime} -i ${inputPath} -y -t ${duration} -c:v libx264 -c:a aac -strict experimental -movflags +faststart ${outputPath}`);
 
-    // 处理视频
-    await new Promise((resolve, reject) => {
-      ffmpeg(inputPath)
+    await new Promise<void>((resolve, reject) => {
+      ffmpeg()
+        .input(inputPath)
         .setStartTime(startTime)
         .setDuration(duration)
         .outputOptions([
-          '-c:v libx264',     // 使用 H.264 编码
-          '-c:a aac',         // 使用 AAC 音频编码
-          '-strict experimental',
-          '-movflags +faststart'  // 优化网络播放
+          '-c:v libx264',  // 重新编码视频流为 H.264
+          '-c:a aac',      // 重新编码音频流为 AAC
+          '-movflags +faststart'
         ])
         .output(outputPath)
         .on('start', (commandLine) => {
-          console.log('FFmpeg 开始处理:', commandLine);
+          console.log('FFmpeg 命令行:', commandLine);
         })
         .on('progress', (progress) => {
-          console.log('处理进度:', progress.percent, '%');
+          console.log("打印处理进度....", progress, new Date());
+          writer.write(
+            new TextEncoder().encode(
+              `data: ${JSON.stringify({ progress: progress.percent })}\n\n`
+            )
+          );
         })
-        .on('end', () => {
-          console.log('FFmpeg 处理完成');
-          resolve(true);
+        .on('end', async () => {
+          try {
+            console.log("FFmpeg 处理完成");
+            const outputBuffer = await require('fs').promises.readFile(outputPath);
+            await require('fs').promises.unlink(outputPath);
+            await require('fs').promises.unlink(inputPath); // 清理输入文件
+            writer.close(); // 关闭写入器
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
         })
-        .on('error', (err) => {
+        .on('error', (err, stdout, stderr) => {
           console.error('FFmpeg 错误:', err);
+          console.error('FFmpeg 标准输出:', stdout);
+          console.error('FFmpeg 错误输出:', stderr);
           reject(err);
         })
         .run();
     });
 
-    // 读取输出文件
-    const outputBuffer = await require('fs').promises.readFile(outputPath);
-
-    // 清理临时文件
-    await require('fs').promises.unlink(inputPath);
-    await require('fs').promises.unlink(outputPath);
-
-    return new NextResponse(outputBuffer, {
+    return new Response(responseStream.readable, {
       headers: {
-        'Content-Type': 'video/mp4',
-        'Content-Disposition': `attachment; filename="cut-video-${timestamp}.mp4"`
-      }
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
     });
 
   } catch (error) {
     console.error('视频处理错误:', error);
-    return NextResponse.json(
-      { error: '视频处理失败: ' + (error as Error).message },
-      { status: 500 }
+    writer.write(
+      new TextEncoder().encode(
+        `data: ${JSON.stringify({ error: (error as Error).message })}\n\n`
+      )
     );
+    writer.close();
+
+    return new Response(responseStream.readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
   }
 }

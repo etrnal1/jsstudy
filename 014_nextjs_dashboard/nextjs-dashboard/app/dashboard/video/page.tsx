@@ -22,6 +22,8 @@ export default function VideoPage() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [startTimeStr, setStartTimeStr] = useState('00:00:00');
   const [endTimeStr, setEndTimeStr] = useState('00:00:00');
+  const [progress, setProgress] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -41,6 +43,9 @@ export default function VideoPage() {
     }
 
     try {
+      setIsProcessing(true);
+      setProgress(0);
+      
       const startSeconds = timeToSeconds(startTimeStr);
       const endSeconds = timeToSeconds(endTimeStr);
       const duration = endSeconds - startSeconds;
@@ -67,7 +72,41 @@ export default function VideoPage() {
         throw new Error(errorData.error || '视频处理失败');
       }
 
-      const blob = await response.blob();
+      // 处理 SSE 响应
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      while (reader) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.progress) {
+                setProgress(Math.round(data.progress));
+                addLog(`处理进度: ${data.progress.toFixed(2)}%`);
+              }
+              if (data.error) {
+                throw new Error(data.error);
+              }
+            } catch (e) {
+              console.error('解析进度数据失败:', e);
+            }
+          }
+        }
+      }
+
+      // 获取处理后的视频
+      const videoResponse = await fetch(url, {
+        method: 'GET',
+      });
+      
+      const blob = await videoResponse.blob();
       const downloadUrl = URL.createObjectURL(blob);
       
       const downloadLink = document.createElement('a');
@@ -81,6 +120,9 @@ export default function VideoPage() {
       addLog('视频处理完成，开始下载');
     } catch (error: any) {
       addLog(`错误: ${error.message}`);
+    } finally {
+      setIsProcessing(false);
+      setProgress(0);
     }
   };
 
@@ -124,11 +166,28 @@ export default function VideoPage() {
           </div>
         </div>
 
+        {isProcessing && (
+          <div className="mb-6">
+            <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-2">
+              <div 
+                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+            <p className="text-sm text-gray-600 text-center">{progress.toFixed(2)}%</p>
+          </div>
+        )}
+
         <button
           onClick={handleCutVideo}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          disabled={isProcessing}
+          className={`px-4 py-2 bg-blue-500 text-white rounded-lg transition-colors ${
+            isProcessing 
+              ? 'opacity-50 cursor-not-allowed' 
+              : 'hover:bg-blue-600'
+          }`}
         >
-          剪切视频
+          {isProcessing ? '处理中...' : '剪切视频'}
         </button>
 
         <div className="mt-6">
