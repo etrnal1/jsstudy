@@ -27,7 +27,7 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
-
+./
 # vercel
 .vercel
 
@@ -38,3 +38,6 @@ next-env.d.ts
 
 database.md
 .env
+./public/temp/*
+
+014_nextjs_dashboard/nextjs-dashboard/public/temp

@@ -44,7 +44,7 @@ export default function VideoPage() {
     };
   }, [previewUrl]);
 
-  // 处理文件选择
+  // 处理文件选择 [当文件选择释放的时候，触发该函数]
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -54,16 +54,19 @@ export default function VideoPage() {
       }
       // 清理之前的预览URL
       if (previewUrl) {
+
+        // 这是一个浏览器API  
         URL.revokeObjectURL(previewUrl);
       }
       // 创建新的预览URL
       const url = URL.createObjectURL(file);
+      // 生成预览url;
       setPreviewUrl(url);
-      // 通过他保存文件
+      // 通过setVideoFile 将视频文件传输进来
       setVideoFile(file);
       setDownloadUrl(''); // 清除之前的下载链接
       setProcessedVideoUrl(''); // 清除之前的处理后视频预览
-      addLog(`已选择文件: ${file.name} (大小: ${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+      addLog(`���选择文件: ${file.name} (大小: ${(file.size / 1024 / 1024).toFixed(2)}MB)`);
       console.log(`已选择文件: ${file.name} (大小: ${(file.size / 1024 / 1024).toFixed(2)}MB)`);
     }
   };
@@ -80,7 +83,13 @@ export default function VideoPage() {
     setter(value);
     console.log(`设置时间: ${value}`);
   };
-
+  const cut =()=>{
+   
+    const formData = new FormData();
+    console.log(formData);
+    console.log("这是视频路径",videoFile)
+    
+  }
   // 处理视频剪切
   const handleCutVideo = async () => {
     console.log('handleCutVideo 被调用');
@@ -100,7 +109,7 @@ export default function VideoPage() {
       // 创建新的 AbortController
       abortControllerRef.current = new AbortController();
 
-      console.log('开始处理视频...');
+      console.log('开始处���视频...');
       setIsProcessing(true);
       setDownloadUrl('');
       setProcessedVideoUrl('');
@@ -184,9 +193,9 @@ export default function VideoPage() {
                     setProcessedVideoUrl(`${window.location.origin}${data.downloadUrl}`);
                   }
                 }
-              } catch (e) {
+              } catch (e: unknown) {
                 console.error('解析事件数据失败:', e);
-                addLog(`解析错误: ${e.message}`);
+                addLog(`解析错误: ${(e as Error).message}`);
               }
             }
           }
@@ -202,6 +211,11 @@ export default function VideoPage() {
       addLog(`错误: ${error.message}`);
       setIsProcessing(false); // 发生错误时设置状态
     }
+
+
+    // 添加 cut 测试
+
+  
   };
 
   return (
@@ -210,7 +224,7 @@ export default function VideoPage() {
         <h1 className={`${lusitana.className} text-2xl`}>视频剪切工具</h1>
       </div>
       <div className="mt-4 flex flex-col gap-4">
-        {/* 文件选择  handleFileChange 来处理 ���取文件*/}
+        {/* 文件选择  handleFileChange 来处理 取文件*/}
         <div>
           <label className="block mb-2 text-sm font-medium">选择视频文件</label>
           <input
@@ -283,13 +297,17 @@ export default function VideoPage() {
         <div className="mt-4 flex gap-4">
           <button
             onClick={handleCutVideo}
-            className="w-full p-2 text-white bg-blue-500 rounded-lg disabled:bg-gray-400"
+            className="w-full p-2 text-white bg-blue-500 rounded-lg disabled:bg-gray-400 display:none"
             disabled={isProcessing || !videoFile || !startTimeStr || !endTimeStr}
           >
-            {isProcessing ? '��理中...' : '剪切视频'}
+            {isProcessing ? '处理中...' : '剪切视频'}
           </button>
         </div>
-
+        {/* 测试链接按钮 */}
+        <div className='mt-1 flex gap-4'>
+          <button onClick={cut} className='w-full p-1 text-white bg-red-600'>测试剪辑 </button>
+        </div>
+        {/* 测试链接结束 */}
         {/* 日志 */}
         <div className="mt-4">
           <h2 className="text-sm font-medium">日志</h2>
