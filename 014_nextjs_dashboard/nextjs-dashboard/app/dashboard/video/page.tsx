@@ -83,11 +83,16 @@ export default function VideoPage() {
     setter(value);
     console.log(`设置时间: ${value}`);
   };
+
+  // 添加cut 操作, videoFile 是通过set操作的
   const cut =()=>{
    
     const formData = new FormData();
     console.log(formData);
     console.log("这是视频路径",videoFile)
+    if(!videoFile){
+      addLog("错误,请添加视频文件")
+    }
     
   }
   // 处理视频剪切
