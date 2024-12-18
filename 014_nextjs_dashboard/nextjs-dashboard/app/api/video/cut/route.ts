@@ -4,257 +4,166 @@ import { NextResponse } from 'next/server';
 import { writeFile, mkdir, stat, unlink } from 'fs/promises';
 import path from 'path';
 import { spawn } from 'child_process';
-import { Readable } from 'stream';
-import { Buffer } from 'buffer';
-
-export const config = {
-  api: {
-    bodyParser: false,
-    responseLimit: false,
-  },
-};
+import { PassThrough } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request: Request) {
-  console.log('Received request headers:', Object.fromEntries(request.headers));
-  
-  const responseStream = new TransformStream();
-  const writer = responseStream.writable.getWriter();
+  const passThrough = new PassThrough();
 
-  const writeToStream = async (data: any) => {
-    const sseData = `data: ${JSON.stringify(data)}\n\n`;
-    await writer.write(new TextEncoder().encode(sseData));
+  // 设置响应头
+  const headers = {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    // 如果需要跨域，取消注释并根据需求调整
+    // 'Access-Control-Allow-Origin': '*',
   };
+
+  const response = new NextResponse(passThrough, { headers });
+
+  let inputPath = '';
+  let outputPath = '';
 
   try {
     const url = new URL(request.url);
     const startTime = url.searchParams.get('startTime') || '00:00:00';
-    const durationParam = url.searchParams.get('duration');
-    const duration = durationParam ? parseInt(durationParam, 10) : 0;
+    const durationStr = url.searchParams.get('duration') || '0';
+    const outputFormat = url.searchParams.get('outputFormat') || 'mp4'; // 默认格式为 mp4
+    const resolution = url.searchParams.get('resolution') || '1280x720'; // 默认分辨率为 1280x720
 
-    if (duration <= 0) {
-      throw new Error('Duration must be greater than 0');
+    const duration = parseInt(durationStr, 10);
+
+    console.log('开始处理视频请求:', { startTime, duration, outputFormat, resolution });
+
+    // 验证输出格式
+    const allowedFormats = ['mp4', 'avi', 'mkv', 'mov', 'flv'];
+    if (!allowedFormats.includes(outputFormat.toLowerCase())) {
+      throw new Error(`不支持的输出格式: ${outputFormat}`);
     }
 
-    // Create temp directory
+    // 验证分辨率格式
+    const resolutionMatch = resolution.match(/^(\d{3,4})x(\d{3,4})$/);
+    if (!resolutionMatch) {
+      throw new Error(`无效的分辨率格式: ${resolution}`);
+    }
+
+    // 创建临时目录
     const tempDir = path.join(process.cwd(), 'public', 'temp');
     await mkdir(tempDir, { recursive: true });
 
-    // Generate file paths
-    const timestamp = Date.now();
-    const inputPath = path.join(tempDir, `input-${timestamp}.mp4`);
-    const outputPath = path.join(tempDir, `output-${timestamp}.mp4`);
+    // 生成唯一文件名
+    const uniqueId = uuidv4();
+    inputPath = path.join(tempDir, `input-${uniqueId}.mp4`);
+    outputPath = path.join(tempDir, `output-${uniqueId}.${outputFormat}`);
 
-    // Read request body as stream
-    const chunks: Buffer[] = [];
-    const reader = request.body?.getReader();
-    if (!reader) {
-      throw new Error('No request body');
+    // 处理 FormData
+    const formData = await request.formData();
+    const file = formData.get('video');
+
+    if (!file || !(file instanceof Blob)) {
+      throw new Error('没有收到有效的视频文件');
     }
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(Buffer.from(value));
-    }
+    // 将文件内容转换为 Buffer 并写入文件
+    const arrayBuffer = await file.arrayBuffer();
+    await writeFile(inputPath, Buffer.from(arrayBuffer));
 
-    const bodyBuffer = Buffer.concat(chunks);
-    
-    // Parse multipart form data manually
-    const contentType = request.headers.get('content-type') || '';
-    console.log('Content-Type:', contentType);
-    
-    const boundary = contentType.split('boundary=')[1];
-    if (!boundary) {
-      throw new Error('No boundary found in content-type');
-    }
-    console.log('Boundary:', boundary);
-
-    // Find video file content in multipart data
-    const boundaryBuffer = Buffer.from(`\r\n--${boundary}`);
-    const headerEnd = Buffer.from('\r\n\r\n');
-    
-    // Find the start of the file content
-    let start = bodyBuffer.indexOf(headerEnd);
-    if (start === -1) {
-      console.log('Could not find header end marker');
-      throw new Error('Invalid multipart form data format: no header end found');
-    }
-    start += headerEnd.length;
-
-    // Find the end of the file content
-    let end = bodyBuffer.indexOf(boundaryBuffer, start);
-    if (end === -1) {
-      // Try alternative boundary format
-      const altBoundaryBuffer = Buffer.from(`--${boundary}--`);
-      end = bodyBuffer.indexOf(altBoundaryBuffer, start);
-      if (end === -1) {
-        console.log('Could not find boundary marker');
-        throw new Error('Invalid multipart form data format: no boundary found');
-      }
-    }
-
-    console.log('Found content bounds:', { start, end, totalLength: bodyBuffer.length });
-
-    const fileContent = bodyBuffer.slice(start, end);
-    if (fileContent.length === 0) {
-      throw new Error('No file content found');
-    }
-    console.log('File content length:', fileContent.length);
-
-    await writeFile(inputPath, fileContent);
-
-    console.log('Video file saved:', inputPath);
+    console.log('视频文件已保存:', inputPath);
     const stats = await stat(inputPath);
-    console.log('Input file size:', stats.size);
+    console.log('输入文件大小:', stats.size);
 
     if (stats.size === 0) {
-      throw new Error('Input file size is 0');
+      throw new Error('输入文件大小为0');
     }
 
-    // Build FFmpeg command arguments
+    // 构建 FFmpeg 命令
     const ffmpegArgs = [
       '-ss', startTime,
       '-i', inputPath,
       '-t', duration.toString(),
+      '-vf', `scale=${resolution}`,
       '-c:v', 'libx264',
       '-c:a', 'aac',
       '-movflags', '+faststart',
-      '-y',
+      '-y', // 覆盖输出文件
       outputPath
     ];
 
-    console.log('FFmpeg command:', 'ffmpeg', ffmpegArgs.join(' '));
+    console.log('FFmpeg 命令:', `ffmpeg ${ffmpegArgs.join(' ')}`);
 
-    // Start FFmpeg process
+    // 执行 FFmpeg
     const ffmpeg = spawn('ffmpeg', ffmpegArgs);
 
-    // Total duration for progress calculation
-    const totalSeconds = duration;
-
-    // Helper function: Convert time string to seconds
-    const timeToSeconds = (timeStr: string): number => {
-      const [hours, minutes, seconds] = timeStr.split(':').map(Number);
-      return hours * 3600 + minutes * 60 + seconds;
-    };
-
-    // Listen to FFmpeg's stderr output, parse progress
-    ffmpeg.stderr.on('data', (data) => {
+    // 处理 FFmpeg 输出以获取进度
+    ffmpeg.stderr.on('data', (data: Buffer) => {
       const message = data.toString();
       console.log('FFmpeg stderr:', message);
 
-      // Use regular expression to extract current processing time
-      const timeMatch = message.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d+)/);
+      // 解析 FFmpeg 的进度信息
+      const timeMatch = message.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/);
       if (timeMatch) {
-        const currentTimeStr = `${timeMatch[1]}:${timeMatch[2]}:${timeMatch[3]}`;
-        const currentSeconds = timeToSeconds(currentTimeStr);
-        const progress = Math.min(100, Math.round((currentSeconds / totalSeconds) * 100));
+        const hours = parseInt(timeMatch[1], 10);
+        const minutes = parseInt(timeMatch[2], 10);
+        const seconds = parseFloat(timeMatch[3]);
+        const elapsedSeconds = hours * 3600 + minutes * 60 + seconds;
+        const progressPercent = duration > 0 ? Math.min((elapsedSeconds / duration) * 100, 100) : 0;
 
-        // Send progress update
-        writeToStream({ progress });
-      } else if (message.includes('kb/s')) {
-        // Send 100% progress when encoding is complete
-        writeToStream({ progress: 100 });
+        // 发送进度更新到前端
+        const progressData = {
+          progress: Math.round(progressPercent),
+        };
+        passThrough.write(`data: ${JSON.stringify(progressData)}\n\n`);
       }
     });
 
-    // Wait for FFmpeg process to complete
+    // 处理 FFmpeg 关闭事件
     await new Promise<void>((resolve, reject) => {
       ffmpeg.on('close', async (code) => {
         if (code === 0) {
-          console.log('FFmpeg processing completed');
+          console.log('FFmpeg 处理完成');
           const outputFileName = path.basename(outputPath);
           const downloadUrl = `/temp/${outputFileName}`;
-          console.log('Generated download link:', downloadUrl);
 
-          // Send completion message
-          await writeToStream({
+          // 发送完成状态和下载链接到前端
+          const completeData = {
             status: 'complete',
             downloadUrl,
             progress: 100
-          });
-
-          // Clean up input file
-          try {
-            await unlink(inputPath);
-            console.log('Input file deleted:', inputPath);
-          } catch (err) {
-            console.error('Failed to delete input file:', err);
-          }
+          };
+          passThrough.write(`data: ${JSON.stringify(completeData)}\n\n`);
 
           resolve();
         } else {
-          console.error('FFmpeg process exited, code:', code);
-          await writeToStream({
-            error: `FFmpeg process exited, code: ${code}`,
-            progress: 0
-          });
-
-          // Clean up input file
-          try {
-            await unlink(inputPath);
-            console.log('Input file deleted:', inputPath);
-          } catch (err) {
-            console.error('Failed to delete input file:', err);
-          }
-
-          reject(new Error(`FFmpeg process exited, code: ${code}`));
+          console.error('FFmpeg 进程退出，代码:', code);
+          const errorData = { error: `FFmpeg 进程退出，代码: ${code}` };
+          passThrough.write(`data: ${JSON.stringify(errorData)}\n\n`);
+          reject(new Error(`FFmpeg 进程退出，代码: ${code}`));
         }
       });
 
-      ffmpeg.on('error', async (err) => {
-        console.error('FFmpeg error:', err);
-        await writeToStream({
-          error: 'FFmpeg process startup failed',
-          progress: 0
-        });
-
-        // Clean up input file
-        try {
-          await unlink(inputPath);
-          console.log('Input file deleted:', inputPath);
-        } catch (err) {
-          console.error('Failed to delete input file:', err);
-        }
-
+      ffmpeg.on('error', (err) => {
+        console.error('FFmpeg 错误:', err);
+        const errorData = { error: err.message };
+        passThrough.write(`data: ${JSON.stringify(errorData)}\n\n`);
         reject(err);
       });
     });
 
-    // Close writer
-    await writer.close();
-
-    // Return SSE response
-    return new NextResponse(responseStream.readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    });
-
   } catch (error: any) {
-    console.error('Processing error:', error);
+    console.error('处理错误:', error);
+    const errorData = { error: error.message };
+    passThrough.write(`data: ${JSON.stringify(errorData)}\n\n`);
+  } finally {
+    // 关闭流
+    passThrough.end();
 
-    // Send error message
-    try {
-      await writeToStream({
-        error: error.message,
-        progress: 0
-      });
-    } catch (err) {
-      console.error('Failed to write error information:', err);
+    // 清理临时输入文件
+    if (inputPath) {
+      await unlink(inputPath).catch(() => console.error('无法删除输入文件'));
     }
-
-    // Close writer
-    await writer.close();
-
-    // Return SSE response
-    return new NextResponse(responseStream.readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    });
+    // 不删除 outputPath，确保用户可以下载
+    // 如果需要，可以设置一个定时任务在一段时间后删除，或者在下载后删除
   }
+
+  return response;
 }
