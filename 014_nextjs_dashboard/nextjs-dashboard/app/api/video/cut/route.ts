@@ -4,8 +4,13 @@ import { NextResponse } from 'next/server';
 import { writeFile, mkdir, stat, unlink } from 'fs/promises';
 import path from 'path';
 import { spawn } from 'child_process';
-import { PassThrough } from 'stream';
+import { PassThrough, Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
+
+// 设置运行时为 Node.js
+export const config = {
+  runtime: 'nodejs',
+};
 
 export async function POST(request: Request) {
   const passThrough = new PassThrough();
@@ -19,7 +24,10 @@ export async function POST(request: Request) {
     // 'Access-Control-Allow-Origin': '*',
   };
 
-  const response = new NextResponse(passThrough, { headers });
+  // 将 PassThrough 转换为 Web ReadableStream，并进行类型断言
+  const webReadable = Readable.toWeb(passThrough) as ReadableStream<Uint8Array>;
+
+  const response = new NextResponse(webReadable, { headers });
 
   let inputPath = '';
   let outputPath = '';
