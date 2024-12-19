@@ -39,14 +39,20 @@ async function saveTasks(tasks: any[]) {
 }
 
 // POST接口 - 用于启动指定ID的定时任务
-export async function POST(req: Request, { params }: { params: { taskId: string } }) {
+export async function POST(req: Request ) {
     try {
-        const { taskId } = params;
-        console.log("正在处理的定时任务ID: ", params)
+       // const { taskId } = params;
+    //    console.log("正在处理的定时任务ID: ", params)
         
         // 从文件中读取所有任务
         const tasks = await readTasks();
-
+        const body = await req.json(); 
+        console.log("打印传输的信息： ",body);
+        // return NextResponse.json({
+        //     message:"hello",
+        //     code:200
+        // });
+        const taskId =  body;
         // 根据taskId查找对应的任务
         const task = tasks.find((task: any) => task.id === taskId);
         if (!task) {
