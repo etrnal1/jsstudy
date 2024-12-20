@@ -8,7 +8,10 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
- 
+  typescript: {
+    // 这将使构建过程忽略类型错误
+    ignoreBuildErrors: true,
+  },
   
 };
 

@@ -44,7 +44,8 @@ const links = [
     icon: BellIcon,
     children: [
       { name: '添加定时任务', href: '/dashboard/cut' },
-      { name: "查看定时任务列表", href: "/dashboard/list" }
+      { name: "查看定时任务列表", href: "/dashboard/list" },
+      { name: "历史", href: "/dashboard/history" }
     ]
   }
 ];

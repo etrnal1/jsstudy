@@ -1,23 +1,5 @@
 [
   {
-    "id": "1734590961222",
-    "title": "duu",
-    "cronExpression": "*/1 * * * *",
-    "command": "/usr/bin/python hello.py",
-    "description": "dd ",
-    "status": "running",
-    "createdAt": "2024-12-19T06:49:21.222Z"
-  },
-  {
-    "id": "1734593290049",
-    "title": "测试nodejs",
-    "cronExpression": "*/1 * * * *",
-    "command": "console.log('node js')",
-    "description": "测试",
-    "status": "running",
-    "createdAt": "2024-12-19T07:28:10.049Z"
-  },
-  {
     "id": "1734596318143",
     "title": "执行bash 脚本",
     "cronExpression": "*/1 * * * *",

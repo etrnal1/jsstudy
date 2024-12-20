@@ -1,14 +1,17 @@
 'use client'
+//列表功能
 import { useState, useEffect } from 'react'
 
 export default function PAGE() {
+    // 通过useState 来管理用户数据
     const [tasks, setTasks] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
     const [loading, setLoading] = useState(true)
     const [editingTask, setEditingTask] = useState<any>(null)
-
+    // 自动获取所有任务数据
     const fetchTasks = async () => {
         try {
+            // 通过请求cut 获取任务数据
             const response = await fetch('/api/cut')
             const data = await response.json()
             console.log("获取任务数据",data);
@@ -21,11 +24,12 @@ export default function PAGE() {
             setLoading(false)
         }
     }
+    // 删除任务数据
 
     const deleteTask = async (taskId: string) => {
         try {
           
-            const response = await fetch(`/api/cut/${taskId}`, {
+            const response = await fetch(`/api/cut/${taskId}/start`, {
                 method: 'DELETE'
             })
             if (response.ok) {

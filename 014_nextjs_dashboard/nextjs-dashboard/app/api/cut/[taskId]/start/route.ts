@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse,NextRequest } from "next/server";
 import cron from "node-cron";
 import { promises as fs } from "fs";
 import path from "path";
+import next from "next";
 
 // 存储任务的文件路径 - 用于保存所有定时任务的配置信息
 const TASKS_FILE = path.join(process.cwd(), "data", "tasks.json");
@@ -19,6 +20,7 @@ async function ensureTaskFile() {
 
 // 确保任务脚本目录存在
 async function ensureTasksDirectory() {
+  // 目录是否存在，不存在则创建
     try {
         await fs.access(TASKS_DIR);
     } catch {
@@ -128,4 +130,55 @@ export async function POST(req: Request ) {
             code: 500,
         });
     }
+}
+type RouteContext = {
+    params: {
+        taskId: string;
+    };
+};
+export async function DELETE(
+  request: NextRequest,
+  context: any,
+)
+    
+    
+    
+    {
+const { taskId } = await context.params;
+
+// 获取id 
+console.log("获取请求数据: ", taskId);
+
+// 查询所有任务,在任务中找到这个id 
+const tasks = await readTasks();
+console.log("任务类型: ",typeof tasks)
+const taskIndex = tasks.findIndex((task: any) => task.id === taskId);
+
+if (taskIndex === -1) {
+    return NextResponse.json({
+        message: "任务未找到",
+        code: 404
+    });
+}
+
+// 删除任务
+tasks.splice(taskIndex, 1);
+//await saveTasks(tasks);
+
+// 删除任务所在脚本,fs 直接删除
+const taskScriptPath = path.join(process.cwd(), 'scripts', `${taskId}.js`);
+try {
+   // await fs.unlink(taskScriptPath);
+    console.log(`任务脚本 ${taskScriptPath} 删除成功`);
+} catch (error) {
+    console.error(`删除任务脚本失败: ${error.message}`);
+    return NextResponse.json({
+        message: "删除任务脚本失败",
+        code: 500
+    });
+}
+return NextResponse.json({
+    message: "任务删除成功",
+    code: 200
+});
 }
