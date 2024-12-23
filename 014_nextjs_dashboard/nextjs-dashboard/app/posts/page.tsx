@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { getData } from '../lib/getData'
-
 export default async function PostsHome({
     searchParams,
 }: {
