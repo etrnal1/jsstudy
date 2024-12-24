@@ -18,15 +18,28 @@
     <script type="text/jsx">
         const app = document.getElementById('app');
         console.log("打印App:",app)
-        
+       
         // header 嵌入到HomePage
         function HomePage(){
-            return <div>
+            const name = ['李','龙','玉']
+             // 数组结构 驼峰 首字母小写，其他单词的首字母大写
+             const [likes,setLikes] = React.useState(0);
+            // 定义相关函数
+            function handleClick(){
+                console.log("志鹏吃屁")
+
+                
+                setLikes(likes+1)
+              
+            }
+            return (<div>
                     <Header title="React" />
-                   <Home />
-            </div>
+                   
+                   <Home name={name} />
+                   <button onClick={handleClick}>Like</button>
+            </div>)
         }
-        function Home(){
+        function Home({name}){
             return <div>               
                 <ul>
                     <li> 1.homopage 包含header,article,footer </li>
@@ -34,12 +47,18 @@
                     <li> 3.nav 
                         nav 包含link </li>
                 </ul>
+                <ul>
+                   {name.map((n)=>(<li key={n}>{n}</li>))}
+                   
+                </ul>
             </div>
         }
-        function Header(props){
-            console.log(props)
-            return (<h1>Hello Dragon</h1>)
+        function Header({title}){
+            console.log(title)
+            return (<h1>Hello {title}</h1>)
         }
+
+
         const root = ReactDOM.createRoot(app);
         root.render(<HomePage />);
     </script>
