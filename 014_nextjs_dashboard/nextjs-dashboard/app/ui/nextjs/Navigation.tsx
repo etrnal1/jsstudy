@@ -11,13 +11,13 @@ export default function Navigation() {
                         href="/about" 
                         className="text-black hover:opacity-75 transition-opacity"
                     >
-                        About
+                        关于
                     </Link>
                     <Link 
                         href="/experiments" 
                         className="text-black hover:opacity-75 transition-opacity"
                     >
-                        Experiments
+                        登录
                     </Link>
                     <Link 
                         href="/sessions" 
@@ -26,10 +26,10 @@ export default function Navigation() {
                         Sessions
                     </Link>
                     <Link 
-                        href="/community" 
+                        href="/posts" 
                         className="text-black hover:opacity-75 transition-opacity"
                     >
-                        Community
+                        文章
                     </Link>
                 </div>
 
