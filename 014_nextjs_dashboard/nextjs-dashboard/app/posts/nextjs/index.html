@@ -19,13 +19,29 @@
         const app = document.getElementById('app');
         console.log("打印App:",app)
         
-        
-
-        function Header(){
+        // header 嵌入到HomePage
+        function HomePage(){
+            return <div>
+                    <Header title="React" />
+                   <Home />
+            </div>
+        }
+        function Home(){
+            return <div>               
+                <ul>
+                    <li> 1.homopage 包含header,article,footer </li>
+                    <li>2.header 包含logo,title,</li>
+                    <li> 3.nav 
+                        nav 包含link </li>
+                </ul>
+            </div>
+        }
+        function Header(props){
+            console.log(props)
             return (<h1>Hello Dragon</h1>)
         }
         const root = ReactDOM.createRoot(app);
-        root.render(<Header />);
+        root.render(<HomePage />);
     </script>
    
   </body>
