@@ -1,16 +1,23 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+   
+</head>
   <body>
-    <div id="app"></div>
-    <!-- 加载两个react 脚本 -->
+   
+    <div id="app">2</div>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script type="text/javascript">
-      const app = document.getElementById('app');
-      const header = document.createElement('h1');
-      const text = 'Develop. Preview. Ship.';
-      const headerContent = document.createTextNode(text);
-      header.appendChild(headerContent);
-      app.appendChild(header);
+    <!-- 加载两个react 脚本 -->
+    <script>
+        const app = document.getElementById('app');
+        console.log("打印App:",app)
+        const root = ReactDOM.createRoot(app);
+        root.render(<h1>Develop. Preview. Ship.</h1>);
     </script>
+   
   </body>
 </html>
