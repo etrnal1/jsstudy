@@ -12,11 +12,20 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <!-- 加载两个react 脚本 -->
-    <script>
+     <!-- 加载bable 用来转换Jsx -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- 添加组件 -->
+    <script type="text/jsx">
         const app = document.getElementById('app');
         console.log("打印App:",app)
+        
+        
+
+        function Header(){
+            return (<h1>Hello Dragon</h1>)
+        }
         const root = ReactDOM.createRoot(app);
-        root.render(<h1>Develop. Preview. Ship.</h1>);
+        root.render(<Header />);
     </script>
    
   </body>
