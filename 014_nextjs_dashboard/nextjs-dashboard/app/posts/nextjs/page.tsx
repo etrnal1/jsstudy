@@ -1,6 +1,7 @@
 'use client'
 import LikeButton from './like_button/like_button'
 import { useState } from "react"
+
 function Header({title}){
     return <div><h1>{title ? title:'志鹏请假了'}</h1></div>
 }

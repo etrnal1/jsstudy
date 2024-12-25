@@ -1,5 +1,10 @@
 import Link from 'next/link'
-import { getData } from '../lib/getData'
+import { getData } from '../lib/getData';
+import Nav from './nextjs/ui/ui_nav'
+import SearchBar  from './nextjs/ui/SearchBar'
+// import SearchResults from './nextjs/ui/SearchResult'
+
+
 export default async function PostsHome({
     searchParams,
 }: {
@@ -8,7 +13,7 @@ export default async function PostsHome({
     const allPostsData = await getData()
     
     // 分页配置
-    const ITEMS_PER_PAGE = 2
+    const ITEMS_PER_PAGE = 5
   
   // 第一次刷新的时候是不会有searchParams.page 这个属性的
     const currentPage =  Number(searchParams.page)||1
@@ -27,9 +32,32 @@ export default async function PostsHome({
         return html?.replace(/<[^>]*>/g, '') || ''
     }
 
+    // 添加搜索结果状态
+  
+
+    // 更新搜索处理函数
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const term = e.target.value
+       
+    }
+
     return (
+        <>
+                <Nav /> 
+               
         <div className="flex flex-col items-center justify-center min-h-screen p-8">
+        
             <h1 className="text-4xl font-bold mb-8">我的博客</h1>
+            
+           <SearchBar />
+
+            {/* 添加搜索结果组件 */}
+            {/* <SearchResults 
+                searchResults={searchResults}
+                searchTerm={searchTerm}
+                stripHtml={stripHtml}
+            /> */}
+
             <div className="w-full max-w-2xl">
                 {/* 博客列表 */}
                 <div className="space-y-4">
@@ -55,6 +83,7 @@ export default async function PostsHome({
 
                 {/* 分页控制 */}
                 <div className="flex justify-center space-x-4 mt-8">
+                    <Link href={`/posts?page=1`} className='bg-blue-500 text-white rounded  hover:bg-red-400'>首页</Link>
                     {currentPage > 1 && (
                         <Link
                             href={`/posts?page=${currentPage - 1}`}
@@ -76,8 +105,10 @@ export default async function PostsHome({
                             下一页
                         </Link>
                     )}
+                    <Link href={`/posts?page=${totalPages}`} className='bg-blue-500 text-white rounded  hover:bg-green-400 px-4 py-4'>尾页</Link>
                 </div>
             </div>
         </div>
+        </>
     )
 }
