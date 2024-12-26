@@ -44,6 +44,7 @@ export const getData = cache(async (): Promise<Post[]> => {
                 .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>')
                 // 链接
                 .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-blue-500 hover:underline">$1</a>')
+                .replace(/`(-.*?)`/g,'<ul><li>$1</li></ul>')
                 // 段落和换行
                 .split('\n\n').map(paragraph => {
                     if (paragraph.trim().startsWith('<')) {

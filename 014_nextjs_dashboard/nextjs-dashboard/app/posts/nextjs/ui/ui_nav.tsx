@@ -18,7 +18,7 @@ export default function Nav() {
                 { name: 'SEO 优化', href: '/services/seo' },
             ],
         },
-        { name: "关于", href: '/about' },
+        { name: "关于", href: '/posts/about' },
     ];
 
     return (
