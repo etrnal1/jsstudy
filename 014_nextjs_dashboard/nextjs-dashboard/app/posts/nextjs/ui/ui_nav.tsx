@@ -19,6 +19,8 @@ export default function Nav() {
             ],
         },
         { name: "关于", href: '/posts/about' },
+        { name: "登录", href: '/posts/login' },
+        { name: "注册", href: '/posts/register' },
     ];
 
     return (
