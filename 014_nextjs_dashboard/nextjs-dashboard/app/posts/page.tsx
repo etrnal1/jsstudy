@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { getData } from '../lib/getData';
 import Nav from './nextjs/ui/ui_nav'
@@ -10,14 +11,16 @@ export default async function PostsHome({
 }: {
     searchParams: { page?: string }
 }) {
-    const allPostsData = await getData()
-    
+    const allPostsData = await getData()   
     // 分页配置
     const ITEMS_PER_PAGE = 5
-  
   // 第一次刷新的时候是不会有searchParams.page 这个属性的
-    const currentPage =  Number(searchParams.page)||1
-    console.log(searchParams)
+    let currentPage = 1;
+  if (!searchParams?.page) {
+    currentPage = 1;
+  } else {
+    currentPage = Number(searchParams.page);
+  }
    
     const totalPages = Math.ceil(allPostsData.length / ITEMS_PER_PAGE)
     

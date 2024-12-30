@@ -1,8 +1,42 @@
 'use client'
+import React from 'react';
 import { useState } from "react";
+import Link from 'next/link'
+import { useRouter } from "next/navigation"; // Changed from next/router to next/navigation
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [passWord, setPassword] = useState('');
+  const router = useRouter(); // Changed Router to router (convention)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try{
+   
+    const response = await fetch('/posts/api/login', { // Fixed API endpoint path
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ userName, passWord })
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || '登录失败');
+      //
+    }
+
+    // 等待请求
+    const data =await response.json();  
+    console.log("打印返回的数据",data);
+    localStorage.setItem('token',data.token);
+    router.push("/posts");
+  }catch(error){
+    console.error("登录失败:", error);
+    }
+  }
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-white">
@@ -29,7 +63,7 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           {/* 用户名输入 */}
           <div>
             <label
@@ -44,6 +78,8 @@ export default function LoginPage() {
                 id="username"
                 placeholder="请输入用户名"
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                onChange={(e) => setUserName(e.target.value)}
+                value={userName}
               />
               <span className="absolute inset-y-0 right-3 flex items-center">
                 📧
@@ -64,7 +100,9 @@ export default function LoginPage() {
                 type={showPassword ? "text" : "password"} // 动态切换输入框类型
                 id="password"
                 placeholder="请输入密码"
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                value={passWord}
               />
               {/* 切换眼睛图标 */}
               <button
@@ -110,9 +148,14 @@ export default function LoginPage() {
           <a href="#" className="hover:underline">
             忘记密码
           </a>
-          <a href="#" className="hover:underline">
-            立即注册
-          </a>
+
+          <Link href="/posts/register" className="hover:underline">
+          
+         
+          立即注册
+       
+           </Link>
+         
         </div>
       </div>
     </div>
