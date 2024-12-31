@@ -12,29 +12,37 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try{
-   
-    const response = await fetch('/posts/api/login', { // Fixed API endpoint path
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ userName, passWord })
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || '登录失败');
-      //
-    }
+    try {
+      const response = await fetch('/posts/api/login', {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userName, passWord })
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        // 添加错误提示
+        alert("登录失败：" + (error.message || "请检查用户名和密码"));
+        return;
+      }
 
-    // 等待请求
-    const data =await response.json();  
-    console.log("打印返回的数据",data);
-    localStorage.setItem('token',data.token);
-    router.push("/posts");
-  }catch(error){
-    console.error("登录失败:", error);
+      const data = await response.json();
+      console.log("登录成功", data);
+      
+      // 保存用户信息
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userName', userName);
+      
+      // 添加成功提示
+      alert("登录成功！");
+      
+      // 跳转到首页
+      router.push("/posts");
+    } catch (error) {
+      console.error("登录失败:", error);
+      alert("登录出错，请稍后重试");
     }
   }
 

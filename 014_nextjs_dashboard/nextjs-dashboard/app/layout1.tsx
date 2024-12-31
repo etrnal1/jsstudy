@@ -1,7 +1,5 @@
 import '@/app/ui/global.css'
 import {inter,lusitana} from '@/app/ui/fonts';
-import { AuthProvider } from './context/AuthContext'
-
 export default function RootLayout({
   children,
 }: {
@@ -10,9 +8,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        {children}
       </body>
     </html>
   );

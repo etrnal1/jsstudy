@@ -2,9 +2,14 @@
 import Link from "next/link";
 import { useState } from "react";
 
+// 添加用户状态显示
+import { useAuth } from '@/app/context/AuthContext'
+
 export default function Nav() {
+    const { isAuthenticated, user, logout } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
+    console.log("欢迎用户: ",user)
 
     const navItems = [
         { name: '首页', href: '/' },
@@ -24,10 +29,28 @@ export default function Nav() {
     ];
 
     return (
+        // 判断用户是否登录
         <nav className="bg-gradient-to-r from-black-200 to-black-300 shadow-lg">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
+                    {/* 判断用户是否登录 */}
+                    {isAuthenticated ? (
+                <div className="flex items-center gap-4">
+                    <span>欢迎用户, {user}</span>
+                    <button 
+                        
+                        className="text-blue-500 hover:text-blue-700"
+                    >
+                        退出登录
+                    </button>
+                </div>
+            ) : (
+                <Link href="/posts/login">登录</Link>
+            )}
+
+                    {/* 判断用户是否登录 */}
+
                     <div className="flex-shrink-0 flex items-center">
                         <span className="text-2xl mr-2">🧪</span>
                         <span className="font-bold text-gray-800">My Blog</span>
