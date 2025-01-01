@@ -1,5 +1,5 @@
 
-import { getPost } from '@/app/lib/getData'
+import { getPost } from '@/app/posts/lib/getData'
 import { Suspense } from 'react'
 import LoadingSkeleton from '@/app/ui/loading-skeleton'
 import ErrorComponent from '@/app/ui/error-component'
@@ -11,8 +11,16 @@ type Props= {
 export default async  function BlogPost({
     searchParams,
 }: Props) {
-    const postId = searchParams.id
+    //获取Id
+    
+    const postId = searchParams?.id;
+
+    if (!postId) {
+        return <p>无效的文章 ID</p>;
+    }
+  
     const post = await getPost(postId)
+ 
   
     return (
         <Suspense fallback={<LoadingSkeleton />}>

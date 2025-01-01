@@ -1,110 +1,99 @@
-// 查询api
-import {NextRequest,NextResponse} from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
-import path from 'path';
-import matter from 'gray-matter';
+import path from 'path'
+import matter from 'gray-matter'
 
-// 请求搜索api
-export async function POST(req:NextRequest){
+export async function POST(req: NextRequest) {
     try {
-        // 获取请求体中搜索关键字
-        const {searchTerm} = await req.json()
+        const { searchTerm, sortOrder } = await req.json()
         
-        // 定义Markdown目录
-        const markDir = path.join(process.cwd(),'/data/')
+        // 如果没有搜索词，直接返回空结果
+        if (!searchTerm?.trim()) {
+            return NextResponse.json({
+                code: 200,
+                data: [],
+                message: "请输入搜索内容"
+            })
+        }
+
+        // 获取 Markdown 文件目录
+        const markDir = path.join(process.cwd(), '/data/')
         
-        // 检查目录是否存在
         if (!fs.existsSync(markDir)) {
-            throw new Error('目录不存在')
+            throw new Error('文章目录不存在')
         }
         
         // 读取所有文件
         const files = fs.readdirSync(markDir)
         
-        // 遍历文件读取内容和元数据
-        const results = files
+        // 处理所有文章
+        let results = files
             .map((file) => {
                 const filePath = path.join(markDir, file)
                 const fileContents = fs.readFileSync(filePath, 'utf-8')
-                const {data, content} = matter(fileContents)
+                const { data, content } = matter(fileContents)
+                
+                // 确保日期格式正确
+                const date = data.date ? new Date(data.date).toISOString() : new Date().toISOString()
                 
                 return {
                     id: file.replace('.md', ''),
-                    title: data.title || '',
-                    date: data.date || '',
+                    title: data.title || '无标题',
+                    date: date,
                     content: content || '',
+                    tags: data.tags || []
                 }
             })
+            // 搜索过滤 - 使用更严格的匹配规则
             .filter((post) => {
-                if (!searchTerm) return true
-                
-                const searchContent = searchTerm.toLowerCase()
-                return (
-                    post.title.toLowerCase().includes(searchContent.toLowerCase()) ||
-                    post.content.toLowerCase().includes(searchContent.toLowerCase())
-                )
+                const searchTerms = searchTerm.toLowerCase()
+                    .split(/\s+/)
+                    .filter(term => term.length > 0);
+
+                // 检查标题和内容
+                const titleLower = post.title.toLowerCase();
+                const contentLower = post.content.toLowerCase();
+
+                // 所有搜索词都必须匹配
+                return searchTerms.every(term => {
+                    // 使用词边界匹配
+                    const wordBoundaryRegex = new RegExp(`\\b${term}\\b`, 'i');
+                    return wordBoundaryRegex.test(titleLower) || 
+                           wordBoundaryRegex.test(contentLower);
+                });
+            });
+
+        // 添加调试日志
+        console.log('搜索词:', searchTerm);
+        console.log('匹配结果数:', results.length);
+
+        // 排序处理
+        if (sortOrder) {
+            results.sort((a, b) => {
+                const dateA = new Date(a.date).getTime()
+                const dateB = new Date(b.date).getTime()
+                return sortOrder === 'asc' ? dateA - dateB : dateB - dateA
             })
+        }
+
+        // 添加结果预览
+        console.log('排序后的结果:', results.map(r => ({
+            id: r.id,
+            title: r.title,
+            date: r.date
+        })));
 
         return NextResponse.json({
             code: 200,
             data: results,
-            message: "搜索成功"
+            message: results.length > 0 ? "搜索成功" : "未找到相关内容"
         })
 
     } catch (error) {
+        console.error('搜索错误:', error)
         return NextResponse.json({
             code: 500,
             message: error instanceof Error ? error.message : "搜索失败"
-        }, {status: 500})
-    }
-}
-
-export async function GET(req:NextRequest){
-    const searchParams = new URL(req.url).searchParams
-    const query = searchParams.get('q')
-    
-    if (!query) {
-        return NextResponse.json({
-            code: 400,
-            message: "缺少搜索参数"
-        }, {status: 400})
-    }
-
-    try {
-        const markDir = path.join(process.cwd(),'/data/')
-        const files = fs.readdirSync(markDir)
-        
-        const results = files
-            .map((file) => {
-                const filePath = path.join(markDir, file)
-                const fileContents = fs.readFileSync(filePath, 'utf-8')
-                const {data, content} = matter(fileContents)
-                
-                return {
-                    id: file.replace('.md', ''),
-                    title: data.title || '',
-                    date: data.date || '',
-                    content: content || '',
-                }
-            })
-            .filter((post) => {
-                const searchContent = query.toLowerCase()
-                return (
-                    post.title.toLowerCase().includes(searchContent) ||
-                    post.content.toLowerCase().includes(searchContent)
-                )
-            })
-
-        return NextResponse.json({
-            code: 200,
-            data: results,
-            message: "搜索成功"
-        })
-        
-    } catch (error) {
-        return NextResponse.json({
-            code: 500, 
-            message: error instanceof Error ? error.message : "搜索失败"
-        }, {status: 500})
+        }, { status: 500 })
     }
 }

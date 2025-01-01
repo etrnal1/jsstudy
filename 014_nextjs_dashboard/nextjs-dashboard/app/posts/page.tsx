@@ -1,90 +1,57 @@
-export const dynamic = 'force-dynamic'
-import Link from 'next/link'
-import { getData } from '../lib/getData';
+import {getData} from './lib/getData'
 import Nav from './nextjs/ui/ui_nav'
-import SearchBar  from './nextjs/ui/SearchBar'
-// import SearchResults from './nextjs/ui/SearchResult'
+import Link from 'next/link';
 
-
-export default async function PostsHome({
+// 显示结果
+import SearchResultsWrapper from './nextjs/ui/SearchResultsWrapper';
+export default async function Page({
     searchParams,
-}: {
-    searchParams: { page?: string }
-}) {
-    const allPostsData = await getData()   
-    // 分页配置
-    const ITEMS_PER_PAGE = 5
-  // 第一次刷新的时候是不会有searchParams.page 这个属性的
-    let currentPage = 1;
-  if (!searchParams?.page) {
-    currentPage = 1;
-  } else {
-    currentPage = Number(searchParams.page);
-  }
-   
-    const totalPages = Math.ceil(allPostsData.length / ITEMS_PER_PAGE)
-    
-    // 获取当前页的数据
-    const paginatedPosts = allPostsData.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    )
-    
-    // 过滤掉HTML标签,只显示纯文本
-    const stripHtml = (html: string) => {
-        return html?.replace(/<[^>]*>/g, '') || ''
-    }
+}:{
+    searchParams:{page?: string}
+}){
+   const data=  await getData();
+   console.log("获取页面数据: ",data);
+   const limit_page= 5
+   let currentPage=1 
+   if(!searchParams.page){
+    console.log("没有识别到页面数据")
+   }else{
+    console.log("else 页面没有数据")
+    currentPage= Number(searchParams.page);
+   }
+   // 计算总页,进一法算出一共几页
 
-    // 添加搜索结果状态
+   const totalPage = Math.ceil(data.length /limit_page )
+  console.log("获取总页数: ",totalPage)
+
+  // 过滤文本数据
+  const stripHtml = (html:string)=>{
+    return html?.replace(/<[^>]*>/g,'') || '' ;
+  }
+  // 获取当前页数据: 
+    const pagePosts = data.slice(
+        (currentPage -1) * limit_page,
+        currentPage * limit_page
+
+    )
+  console.log("打印页面 ",currentPage)
+  console.log("打印当前页面数据: ",pagePosts)
   
 
-    // 更新搜索处理函数
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const term = e.target.value
-       
-    }
-
+   
     return (
         <>
-                <Nav /> 
-               
-        <div className="flex flex-col items-center justify-center min-h-screen p-8">
-        
-            <h1 className="text-4xl font-bold mb-8">我的博客</h1>
-            
-           <SearchBar />
-
-            {/* 添加搜索结果组件 */}
-            {/* <SearchResults 
-                searchResults={searchResults}
-                searchTerm={searchTerm}
-                stripHtml={stripHtml}
-            /> */}
-
-            <div className="w-full max-w-2xl">
-                {/* 博客列表 */}
-                <div className="space-y-4">
-                    {paginatedPosts.map((post) => (
-                        <div key={post.id} className="block p-6 bg-white rounded-lg shadow">
-                            <h2 className="text-2xl font-semibold mb-2">{post.title}</h2>
-                            {/* 显示纯文本内容预览,限制在100个字符 */}
-                            <p className="text-gray-600 mb-2">
-                                {stripHtml(post.content || '').substring(0, 100)}
-                                {post.content && stripHtml(post.content).length > 100 ? '...' : ''}
-                            </p>
-
-                            <Link 
-                                href={`/posts/first?id=${post.id}`}  // 使用查询参数传递文章ID
-                                className="text-blue-500 hover:text-blue-700"
-                                prefetch={true}
-                            >
-                                阅读更多 →
-                            </Link>
-                        </div>
-                    ))}
-                </div>
-
-                {/* 分页控制 */}
+            <Nav />
+          
+            <div className="flex  flex-col justify-center items-center min-h-screen p-8">
+                <h1 className="text-4xl font-bold mb-8">我的博客</h1>
+                {/* 点击搜索按钮 */}
+                <SearchResultsWrapper initialPosts ={pagePosts}
+                
+                
+                />
+                <div className='w-full max-w-2xl'>
+                         {/* 分页控制 */}
                 <div className="flex justify-center space-x-4 mt-8">
                     <Link href={`/posts?page=1`} className='bg-blue-500 text-white rounded  hover:bg-red-400'>首页</Link>
                     {currentPage > 1 && (
@@ -97,10 +64,10 @@ export default async function PostsHome({
                     )}
                     
                     <span className="px-4 py-2">
-                        第 {currentPage} 页，共 {totalPages} 页
+                        第 {currentPage} 页，共 {totalPage} 页
                     </span>
                     
-                    {currentPage < totalPages && (
+                    {currentPage < totalPage && (
                         <Link
                             href={`/posts?page=${currentPage + 1}`}
                             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -108,10 +75,14 @@ export default async function PostsHome({
                             下一页
                         </Link>
                     )}
-                    <Link href={`/posts?page=${totalPages}`} className='bg-blue-500 text-white rounded  hover:bg-green-400 px-4 py-4'>尾页</Link>
+                    <Link href={`/posts?page=${totalPage}`} className='bg-blue-500 text-white rounded  hover:bg-green-400 px-4 py-4'>尾页</Link>
                 </div>
+
+                </div>
+                    
             </div>
-        </div>
+            
         </>
+       
     )
 }

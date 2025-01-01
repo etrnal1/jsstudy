@@ -1,17 +1,14 @@
 
-
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
 import { cache } from 'react'
-
 export type Post = {
     id: string;
     title: string;
     date: string;
     content?: string;
 }
-
 // 使用 React cache 优化数据获取
 export const getData = cache(async (): Promise<Post[]> => {
     const postsDirectory = path.join(process.cwd(), 'data')

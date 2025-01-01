@@ -1,5 +1,5 @@
 // 导入查询数据的程序
-import { getPost } from '@/app/lib/getData'
+import { getPost } from '@/app/lib/getData1'
 import { Suspense } from 'react'
 import LoadingSkeleton from '@/app/ui/loading-skeleton'
 import ErrorComponent from '@/app/ui/error-component'

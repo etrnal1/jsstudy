@@ -1,6 +1,6 @@
 ---
-title: nextjs的路由和数据处理模式
-date: 2024-12-20 04:48 pm
+title: "nextjs的路由和数据处理模式"
+date:  "2024-12-20"
 ---
 
 # nextjs 的路由

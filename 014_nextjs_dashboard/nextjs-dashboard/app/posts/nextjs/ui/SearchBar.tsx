@@ -1,90 +1,79 @@
-'use client'
-import { useState } from 'react'
+'use client';
+// 用户输入相关关键词,调用api,返回结果给父组件
+import { useState } from 'react';
 
-import Link from 'next/link';
-interface Post {
-    id: string;
-    title: string;
-    content: string;
+interface SearchBarProps {
+    onSearch: (results: any[]) => void;
+    onSearchStateChange?: (isSearching: boolean) => void;
 }
 
-export default function SearchBar() {
-    const [keyWord,setKeyWord] = useState<String>('');
-    const [posts, setPosts] = useState<Post[]>([]);
-    const handleChange=(value)=>{
-        console.log("cs")
-      
-        setKeyWord(value)
-      
-       
-    }
-    // 点击搜索
-    const handleClick=()=>{
-        if(keyWord=='')
-        {
-            alert("请填数据")
-        }else{
-            
-        fetch('/posts/api/search',{
-            headers:{
-                'content-type':"application/json"
-            },
-            method:"POST",
-            body: JSON.stringify({searchTerm:keyWord})
-        })
-        .then(response => response.json())
-        .then(data => {
-            if(data.code === 200) {
-                setPosts(data.data);
+export default function SearchBar({ onSearch, onSearchStateChange }: SearchBarProps) {
+    const [keyWord, setKeyWord] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const fetchResults = async () => {
+        if (!keyWord.trim()) {
+            setError('请输入搜索内容');
+            onSearch([]); // 清空结果
+            return;
+        }
+
+        setIsLoading(true);
+        setError('');
+        onSearchStateChange?.(true);
+
+        try {
+            const response = await fetch('/posts/api/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ searchTerm: keyWord.trim() }),
+            });
+
+            const data = await response.json();
+            if (data.code === 200) {
+                onSearch(data.data); // 返回搜索结果
             } else {
-                alert('搜索失败，请重试');
+                setError(data.message || '搜索失败');
+                onSearch([]);
             }
-        })
-        .catch(error => {
-            console.error('搜索出错:', error);
-            alert('搜索出错，请重试');
-        });
+        } catch (err) {
+            setError('搜索过程中发生错误');
+            onSearch([]);
+        } finally {
+            setIsLoading(false);
+            onSearchStateChange?.(false);
+        }
+    };
+    const handleKey=()=>{
+        fetchResults()
     }
-}
-    // const handleSearch = (results: Post[]) => {
-    //     setPosts([]);
-    // }
-    
+    const handleSearch = () => {
+        fetchResults();
+    };
 
     return (
         <div className="w-full max-w-2xl mx-auto">
-         
-           <div className="flex">
-           <input 
+            {/* 添加enter键触发 */}
+            <input
                 type="text"
-                placeholder="请输入搜索内容..."
-                className="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-200"
-                onChange={(e)=>setKeyWord(e.target.value)}
+                placeholder="输入关键词搜索文章..."
+                value={keyWord}
+                onChange={(e) => setKeyWord(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg"
+                onKeyDown={(e)=>{if(e.key=="Enter"){ fetchResults();}}}
+                disabled={isLoading}
             />
-            <button className="text-black-400 rounded bg-blue-500 shadow px-5 ml-4" onClick ={handleClick}>搜索</button>
-           </div>
-           
-            
-            {/* 显示搜索结果 */}
-            {posts.length > 0 && (
-                <div className="mt-8 space-y-4">
-                    {posts.map((post) => (
-                        <div key={post.id} className="p-4 bg-white rounded-lg shadow">
-                            <h3 className="text-xl font-bold text-gray-800">{post.title}</h3>
-                            <p className="mt-2 text-gray-600 whitespace-pre-wrap">
-                                {post.content.substring(0, 200)}
-                                {post.content.length > 200 && '...'}
-                            </p>
-                            <Link
-                                href={`/posts/first?id=${post.id}`}
-                                className="text-blue-500 hover:text-blue-700 mt-2 inline-block"
-                            >
-                                阅读更多 →
-                            </Link>
-                        </div>
-                    ))}
-                </div>
-            )}
+            {error && <p className="text-red-500">{error}</p>}
+            <button
+                onClick={handleSearch}
+                className="px-4 py-2 mt-4 bg-blue-500 text-white rounded-lg"
+                disabled={isLoading || !keyWord.trim()}
+            >
+                {isLoading ? '搜索中...' : '搜索'}
+            </button>
         </div>
-    )
+    );
 }
