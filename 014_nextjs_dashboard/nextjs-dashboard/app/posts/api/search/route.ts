@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
                 // 所有搜索词都必须匹配
                 return searchTerms.every(term => {
                     // 使用词边界匹配
-                    const wordBoundaryRegex = new RegExp(`\\b${term}\\b`, 'i');
+                    const wordBoundaryRegex = new RegExp(term, 'i');
                     return wordBoundaryRegex.test(titleLower) || 
                            wordBoundaryRegex.test(contentLower);
                 });
